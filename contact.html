@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — DémarcheExpress</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --blue:#1a56db;--blue-hover:#1240b0;--blue-light:#e8f0fe;--dark:#0f172a;--gray:#475569;--bg:#f7f8fc;--border:#e2e8f0;--radius:10px;--radius-lg:20px;--shadow:0 4px 24px rgba(26,86,219,.10); }
+    body { font-family:'Nunito Sans',system-ui,sans-serif; background:var(--bg); color:var(--dark); }
+    header { background:rgba(255,255,255,.97); border-bottom:1px solid var(--border); padding:0 2rem; display:flex; align-items:center; height:64px; gap:1.5rem; position:sticky; top:0; z-index:100; }
+    .logo { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.2rem; color:var(--blue); text-decoration:none; }
+    .logo span { color:var(--dark); }
+    nav { margin-left:auto; display:flex; gap:1.5rem; align-items:center; }
+    nav a { font-size:.88rem; color:var(--gray); text-decoration:none; }
+    nav a:hover { color:var(--blue); }
+    .btn-nav { background:var(--blue); color:white !important; padding:.5rem 1.1rem; border-radius:var(--radius); font-weight:600; }
+    main { max-width:900px; margin:3rem auto; padding:0 1.5rem 4rem; display:grid; grid-template-columns:1fr 1fr; gap:2rem; align-items:start; }
+    .contact-info h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:2rem; font-weight:800; color:var(--dark); margin-bottom:.75rem; }
+    .contact-info p { color:var(--gray); line-height:1.7; margin-bottom:1.5rem; }
+    .info-card { background:white; border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; margin-bottom:.75rem; display:flex; gap:.85rem; align-items:flex-start; }
+    .info-icon { font-size:1.25rem; flex-shrink:0; margin-top:.1rem; }
+    .info-title { font-weight:700; font-size:.88rem; color:var(--dark); }
+    .info-val { font-size:.83rem; color:var(--gray); margin-top:.15rem; }
+    .form-card { background:white; border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.75rem; box-shadow:var(--shadow); }
+    .form-card h2 { font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:1.1rem; margin-bottom:1.25rem; color:var(--dark); }
+    .field { margin-bottom:.85rem; }
+    .field label { display:block; font-size:.82rem; font-weight:600; color:var(--dark); margin-bottom:.3rem; }
+    .field input, .field select, .field textarea { width:100%; border:1.5px solid var(--border); border-radius:var(--radius); padding:.6rem .9rem; font-size:.88rem; color:var(--dark); background:var(--bg); font-family:inherit; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-light); background:white; }
+    .btn { width:100%; background:var(--blue); color:white; border:none; border-radius:var(--radius); padding:.75rem; font-size:.92rem; font-weight:700; cursor:pointer; font-family:inherit; transition:.15s; }
+    .btn:hover { background:var(--blue-hover); }
+    .success-msg { display:none; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:var(--radius); padding:.75rem 1rem; color:#15803d; font-size:.85rem; text-align:center; margin-top:.75rem; }
+    footer { background:var(--dark); color:#94a3b8; padding:3rem 1.5rem; text-align:center; font-size:.83rem; }
+    footer a { color:#94a3b8; text-decoration:none; margin:0 .75rem; }
+    @media(max-width:700px) { main { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="logo">DÉMARCHE<span>EXPRESS</span></a>
+  <nav>
+    <a href="services.html">Services</a>
+    <a href="faq.html">FAQ</a>
+    <a href="contact.html" style="color:var(--blue);font-weight:600">Contact</a>
+    <a href="login-client.html" class="btn-nav">Mon espace</a>
+  </nav>
+</header>
+<main>
+  <div class="contact-info">
+    <h1>Contactez-nous</h1>
+    <p>Une question sur nos services ou votre dossier ? Notre équipe répond sous 24h ouvrées.</p>
+    <div class="info-card"><div class="info-icon">📧</div><div><div class="info-title">Email</div><div class="info-val">contact@demarcheexpress.fr</div></div></div>
+    <div class="info-card"><div class="info-icon">📞</div><div><div class="info-title">Téléphone</div><div class="info-val">Disponible après ouverture de dossier</div></div></div>
+    <div class="info-card"><div class="info-icon">🕐</div><div><div class="info-title">Horaires</div><div class="info-val">Lun–Ven 9h–18h<br>Réponse email sous 24h</div></div></div>
+    <div class="info-card"><div class="info-icon">💬</div><div><div class="info-title">Espace client</div><div class="info-val">Messagerie directe disponible dans votre espace après création de compte.</div></div></div>
+  </div>
+  <div class="form-card">
+    <h2>Envoyer un message</h2>
+    <div class="field"><label>Nom complet</label><input type="text" id="c-nom" placeholder="Jean Dupont"></div>
+    <div class="field"><label>Email</label><input type="email" id="c-email" placeholder="jean@email.com"></div>
+    <div class="field"><label>Sujet</label>
+      <select id="c-sujet">
+        <option value="">Sélectionnez...</option>
+        <option>Question sur les tarifs</option>
+        <option>Suivi de mon dossier</option>
+        <option>Problème technique</option>
+        <option>Autre</option>
+      </select>
+    </div>
+    <div class="field"><label>Message</label><textarea id="c-msg" rows="5" placeholder="Décrivez votre question ou problème…"></textarea></div>
+    <button class="btn" onclick="sendContact()">Envoyer le message</button>
+    <div class="success-msg" id="success-msg">✅ Message envoyé ! Nous vous répondrons sous 24h ouvrées.</div>
+  </div>
+</main>
+<footer>
+  <p><a href="index.html">Accueil</a><a href="services.html">Services</a><a href="faq.html">FAQ</a><a href="mentions-legales.html">Mentions légales</a></p>
+  <p style="margin-top:.75rem">© 2026 DémarcheExpress</p>
+</footer>
+<script>
+function sendContact() {
+  const nom = document.getElementById('c-nom').value.trim();
+  const email = document.getElementById('c-email').value.trim();
+  const msg = document.getElementById('c-msg').value.trim();
+  if (!nom || !email || !msg) { alert('Veuillez remplir tous les champs obligatoires.'); return; }
+  document.getElementById('success-msg').style.display = 'block';
+}
+</script>
+</body>
+</html>
