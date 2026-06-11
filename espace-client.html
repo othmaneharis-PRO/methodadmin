@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Espace — DémarcheExpress</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --blue:#1a56db;--blue-hover:#1240b0;--blue-light:#e8f0fe;--dark:#0f172a;--gray:#475569;--bg:#f7f8fc;--white:#fff;--border:#e2e8f0;--radius:10px;--radius-lg:20px; }
+    body { font-family:'Nunito Sans',system-ui,sans-serif; background:var(--bg); color:var(--dark); min-height:100vh; }
+    header { background:white; border-bottom:1px solid var(--border); padding:0 1.5rem; display:flex; align-items:center; height:64px; gap:1rem; position:sticky; top:0; z-index:50; }
+    .logo { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.1rem; color:var(--blue); text-decoration:none; }
+    .logo span { color:var(--dark); }
+    .user-info { margin-left:auto; display:flex; align-items:center; gap:.75rem; }
+    .user-badge { font-size:.83rem; color:var(--gray); }
+    .btn-logout { font-size:.82rem; color:var(--gray); border:1px solid var(--border); border-radius:var(--radius); padding:.35rem .8rem; cursor:pointer; background:none; font-family:inherit; transition:.15s; }
+    .btn-logout:hover { border-color:#ef4444; color:#ef4444; }
+    .layout { display:grid; grid-template-columns:220px 1fr; min-height:calc(100vh - 64px); }
+    .sidebar { background:var(--dark); padding:1.5rem 0; }
+    .sidebar-item { display:flex; align-items:center; gap:.65rem; padding:.7rem 1.25rem; font-size:.87rem; color:#94a3b8; cursor:pointer; transition:.15s; border-left:3px solid transparent; }
+    .sidebar-item:hover { color:white; background:rgba(255,255,255,.06); }
+    .sidebar-item.active { color:white; border-left-color:var(--blue); background:rgba(26,86,219,.15); }
+    .sidebar-section { font-size:.7rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:.08em; padding:.5rem 1.25rem; margin-top:1rem; }
+    .content { padding:2rem; max-width:900px; }
+    .page { display:none; }
+    .page.active { display:block; }
+    .page-title { font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:1.4rem; color:var(--dark); margin-bottom:1.5rem; }
+    .card { background:white; border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem; margin-bottom:1rem; }
+    .dossier-card { background:white; border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem 1.5rem; margin-bottom:.75rem; display:flex; align-items:center; gap:1rem; cursor:pointer; transition:.15s; }
+    .dossier-card:hover { border-color:var(--blue); box-shadow:0 2px 12px rgba(26,86,219,.08); }
+    .dossier-ref { font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:.95rem; color:var(--dark); }
+    .dossier-service { font-size:.8rem; color:var(--gray); margin-top:.2rem; }
+    .badge { display:inline-block; padding:.25rem .65rem; border-radius:20px; font-size:.73rem; font-weight:700; }
+    .badge-nouvelle { background:#fef3c7; color:#92400e; }
+    .badge-en_etude { background:#dbeafe; color:#1e40af; }
+    .badge-devis_envoye { background:#ede9fe; color:#5b21b6; }
+    .badge-devis_valide { background:#d1fae5; color:#065f46; }
+    .badge-docs_attente { background:#fce7f3; color:#9d174d; }
+    .badge-en_traitement { background:#dbeafe; color:#1e40af; }
+    .badge-termine { background:#d1fae5; color:#065f46; }
+    .badge-annulee { background:#fee2e2; color:#991b1b; }
+    .dossier-date { font-size:.78rem; color:#94a3b8; margin-left:auto; }
+    .empty-state { text-align:center; padding:3rem 1rem; color:var(--gray); }
+    .empty-state .es-icon { font-size:3rem; margin-bottom:1rem; }
+    .empty-state h3 { font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:1.1rem; color:var(--dark); margin-bottom:.5rem; }
+    .btn-primary { background:var(--blue); color:white; border:none; border-radius:var(--radius); padding:.65rem 1.25rem; font-size:.88rem; font-weight:700; cursor:pointer; font-family:inherit; text-decoration:none; display:inline-block; transition:.15s; }
+    .btn-primary:hover { background:var(--blue-hover); }
+    .loading { display:flex; align-items:center; justify-content:center; padding:3rem; color:var(--gray); font-size:.9rem; gap:.75rem; }
+    .spinner { width:20px; height:20px; border:2.5px solid var(--border); border-top-color:var(--blue); border-radius:50%; animation:spin .7s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .msg-bubble { background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:.85rem 1rem; margin-bottom:.6rem; max-width:80%; }
+    .msg-bubble.mine { background:var(--blue-light); margin-left:auto; border-color:rgba(26,86,219,.2); }
+    .msg-meta { font-size:.72rem; color:#94a3b8; margin-bottom:.25rem; }
+    .msg-text { font-size:.87rem; color:var(--dark); line-height:1.5; }
+    .msg-input-row { display:flex; gap:.75rem; margin-top:1rem; }
+    .msg-input { flex:1; border:1.5px solid var(--border); border-radius:var(--radius); padding:.6rem .9rem; font-size:.88rem; font-family:inherit; }
+    .msg-input:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-light); }
+  </style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="logo">DÉMARCHE<span>EXPRESS</span></a>
+  <div class="user-info">
+    <span class="user-badge" id="user-name">Chargement…</span>
+    <button class="btn-logout" onclick="logout()">Déconnexion</button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sidebar-section">Mon compte</div>
+    <div class="sidebar-item active" onclick="showPage('dossiers', this)">📂 Mes dossiers</div>
+    <div class="sidebar-item" onclick="showPage('messages', this)">💬 Messagerie</div>
+    <div class="sidebar-item" onclick="showPage('documents', this)">📄 Mes documents</div>
+    <div class="sidebar-section">Actions</div>
+    <div class="sidebar-item" onclick="window.location.href='creation-entreprise.html'">🚀 Nouvelle demande</div>
+  </nav>
+
+  <main class="content">
+
+    <!-- DOSSIERS -->
+    <div class="page active" id="page-dossiers">
+      <h1 class="page-title">Mes dossiers</h1>
+      <div id="dossiers-list">
+        <div class="loading"><div class="spinner"></div> Chargement de vos dossiers…</div>
+      </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="page" id="page-messages">
+      <h1 class="page-title">Messagerie</h1>
+      <div class="card">
+        <div id="messages-list" style="max-height:400px;overflow-y:auto;margin-bottom:.5rem">
+          <div class="loading"><div class="spinner"></div> Chargement…</div>
+        </div>
+        <div class="msg-input-row">
+          <input class="msg-input" type="text" id="msg-input" placeholder="Votre message…">
+          <button class="btn-primary" onclick="sendMessage()">Envoyer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTS -->
+    <div class="page" id="page-documents">
+      <h1 class="page-title">Mes documents</h1>
+      <div id="docs-list">
+        <div class="loading"><div class="spinner"></div> Chargement…</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://sahbhyccnkcqjzxkyzol.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwNjcxNzEsImV4cCI6MjA2NDY0MzE3MX0.Bla_IH6RjvV4OyUVqtb26Jlp8hqOFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let currentUser = null; let clientId = null;
+
+const svcLabels = { creation_entreprise:'Création d\'entreprise', modification:'Modification', fermeture:'Fermeture / Radiation', kbis:'Extrait Kbis' };
+
+async function init() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'login-client.html'; return; }
+  currentUser = session.user;
+  const meta = currentUser.user_metadata;
+  document.getElementById('user-name').textContent = (meta?.prenom || '') + ' ' + (meta?.nom || '') || currentUser.email;
+  await loadClient();
+  await loadDossiers();
+}
+
+async function loadClient() {
+  const { data } = await supabase.from('de_clients').select('id').eq('email', currentUser.email).single();
+  if (data) clientId = data.id;
+}
+
+async function loadDossiers() {
+  const container = document.getElementById('dossiers-list');
+  if (!clientId) { container.innerHTML = emptyState('📂', 'Aucun dossier trouvé', 'Votre premier dossier apparaîtra ici après soumission d\'une demande.'); return; }
+  const { data, error } = await supabase.from('de_demandes').select('*').eq('client_id', clientId).order('created_at', { ascending: false });
+  if (!data || data.length === 0) { container.innerHTML = emptyState('📂', 'Aucun dossier pour l\'instant', 'Commencez par soumettre une demande.') + '<div style="text-align:center;margin-top:1rem"><a href="creation-entreprise.html" class="btn-primary">🚀 Créer mon entreprise</a></div>'; return; }
+  container.innerHTML = data.map(d => `
+    <div class="dossier-card">
+      <div>
+        <div class="dossier-ref">${d.reference || d.id.slice(0,8).toUpperCase()}</div>
+        <div class="dossier-service">${svcLabels[d.service] || d.service}</div>
+      </div>
+      <span class="badge badge-${d.statut}">${statutLabel(d.statut)}</span>
+      <span class="dossier-date">${new Date(d.created_at).toLocaleDateString('fr-FR')}</span>
+    </div>
+  `).join('');
+}
+
+async function loadMessages() {
+  const container = document.getElementById('messages-list');
+  if (!clientId) { container.innerHTML = '<p style="text-align:center;color:var(--gray);font-size:.85rem;padding:1rem">Aucun message.</p>'; return; }
+  const { data } = await supabase.from('de_messages').select('*').eq('client_id', clientId).order('created_at', { ascending: true });
+  if (!data || data.length === 0) { container.innerHTML = '<p style="text-align:center;color:var(--gray);font-size:.85rem;padding:1rem">Aucun message pour l\'instant.</p>'; return; }
+  container.innerHTML = data.map(m => `
+    <div class="msg-bubble ${m.auteur === 'client' ? 'mine' : ''}">
+      <div class="msg-meta">${m.auteur === 'client' ? 'Vous' : 'DémarcheExpress'} · ${new Date(m.created_at).toLocaleString('fr-FR')}</div>
+      <div class="msg-text">${m.contenu}</div>
+    </div>
+  `).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+async function loadDocuments() {
+  const container = document.getElementById('docs-list');
+  container.innerHTML = emptyState('📄', 'Vos documents apparaîtront ici', 'L\'équipe vous demandera de fournir des pièces justificatives selon votre dossier.');
+}
+
+async function sendMessage() {
+  const input = document.getElementById('msg-input');
+  const txt = input.value.trim();
+  if (!txt || !clientId) return;
+  await supabase.from('de_messages').insert({ client_id: clientId, contenu: txt, auteur: 'client' });
+  input.value = '';
+  await loadMessages();
+}
+
+function emptyState(icon, title, desc) {
+  return `<div class="empty-state"><div class="es-icon">${icon}</div><h3>${title}</h3><p>${desc}</p></div>`;
+}
+
+function statutLabel(s) {
+  const l = { nouvelle:'Nouvelle demande', en_etude:'En étude', devis_envoye:'Devis envoyé', devis_valide:'Devis accepté', docs_attente:'Documents requis', en_traitement:'En traitement', termine:'Terminé ✅', annulee:'Annulé' };
+  return l[s] || s;
+}
+
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'messages') loadMessages();
+  if (name === 'documents') loadDocuments();
+}
+
+async function logout() {
+  await supabase.auth.signOut();
+  window.location.href = 'login-client.html';
+}
+
+init();
+</script>
+</body>
+</html>
