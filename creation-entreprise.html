@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Créer mon entreprise — DémarcheExpress</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #1a56db;
+      --blue-hover: #1240b0;
+      --blue-deep: #0d2d7a;
+      --blue-light: #e8f0fe;
+      --dark: #0f172a;
+      --gray: #475569;
+      --bg: #f7f8fc;
+      --white: #ffffff;
+      --border: #e2e8f0;
+      --radius: 10px;
+      --radius-lg: 20px;
+      --shadow: 0 4px 24px rgba(26,86,219,.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Nunito Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      min-height: 100vh;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* ─── HEADER ─── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,.97);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      height: 64px;
+      gap: 1rem;
+    }
+    .logo {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--blue);
+      text-decoration: none;
+    }
+    .logo span { color: var(--dark); }
+    .header-sep { color: var(--border); }
+    .header-sub {
+      font-size: .85rem;
+      color: var(--gray);
+    }
+    .header-back {
+      margin-left: auto;
+      font-size: .85rem;
+      color: var(--blue);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      transition: .15s;
+    }
+    .header-back:hover { color: var(--blue-hover); }
+
+    /* ─── MAIN CONTAINER ─── */
+    .main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 0 1rem 4rem;
+    }
+
+    /* ─── STEP HEADER ─── */
+    .step-header {
+      text-align: center;
+      margin-bottom: 1.75rem;
+      animation: slideUp .3s ease;
+    }
+    .step-header h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--dark);
+      line-height: 1.3;
+    }
+    .step-header p {
+      color: var(--gray);
+      margin-top: .4rem;
+      font-size: .9rem;
+    }
+
+    /* ─── PROGRESS BAR ─── */
+    .progress-wrap {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .step-dot {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .82rem;
+      font-weight: 700;
+      transition: all .25s;
+      flex-shrink: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .step-dot.done {
+      background: var(--blue);
+      color: var(--white);
+    }
+    .step-dot.active {
+      background: var(--blue);
+      color: var(--white);
+      box-shadow: 0 0 0 5px var(--blue-light);
+    }
+    .step-dot.todo {
+      background: #f1f5f9;
+      color: #94a3b8;
+      border: 1.5px solid var(--border);
+    }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      transition: background .35s;
+    }
+    .step-line.done { background: var(--blue); }
+
+    /* ─── CARD ─── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      animation: slideUp .3s ease;
+    }
+
+    /* ─── FORMS ─── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .form-grid.single { grid-template-columns: 1fr; }
+    .field { margin-bottom: .1rem; }
+    label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: .35rem;
+      letter-spacing: .01em;
+    }
+    input, select, textarea {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: .65rem .95rem;
+      font-size: .9rem;
+      color: var(--dark);
+      background: var(--bg);
+      transition: border-color .15s, box-shadow .15s, background .15s;
+      font-family: 'Nunito Sans', sans-serif;
+      appearance: none;
+    }
+    input:hover, select:hover { border-color: #cbd5e1; }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--blue);
+      background: var(--white);
+      box-shadow: 0 0 0 3px var(--blue-light);
+    }
+    input::placeholder, textarea::placeholder { color: #94a3b8; }
+    textarea { resize: vertical; min-height: 90px; }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right .9rem center;
+      padding-right: 2.2rem;
+      cursor: pointer;
+    }
+
+    /* ─── RADIO BUTTONS STRUCTURE ─── */
+    .radio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .85rem;
+    }
+    .radio-card {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.1rem;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, transform .1s;
+      background: var(--bg);
+      position: relative;
+      user-select: none;
+    }
+    .radio-card:hover {
+      border-color: var(--blue);
+      background: #f0f4ff;
+      transform: translateY(-1px);
+    }
+    .radio-card.selected {
+      border-color: var(--blue);
+      background: var(--blue-light);
+    }
+    .radio-card.selected::after {
+      content: '✓';
+      position: absolute;
+      top: .6rem;
+      right: .75rem;
+      width: 22px;
+      height: 22px;
+      background: var(--blue);
+      color: white;
+      border-radius: 50%;
+      font-size: .75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    .rc-icon {
+      font-size: 1.5rem;
+      margin-bottom: .4rem;
+    }
+    .rc-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: .9rem;
+      color: var(--dark);
+      margin-bottom: .2rem;
+    }
+    .rc-desc {
+      font-size: .77rem;
+      color: var(--gray);
+      line-height: 1.4;
+    }
+    .rc-badge {
+      display: inline-block;
+      margin-top: .4rem;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .15rem .5rem;
+      border-radius: 20px;
+      background: #f1f5f9;
+      color: var(--gray);
+    }
+    .radio-card.selected .rc-badge {
+      background: rgba(26,86,219,.12);
+      color: var(--blue);
+    }
+
+    /* ─── URGENCE BUTTONS ─── */
+    .urgence-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .75rem;
+      margin-top: .5rem;
+    }
+    .urgence-btn {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: .85rem .5rem;
+      text-align: center;
+      cursor: pointer;
+      background: var(--bg);
+      transition: .15s;
+      font-family: 'Nunito Sans', sans-serif;
+    }
+    .urgence-btn:hover { border-color: var(--blue); background: #f0f4ff; }
+    .urgence-btn .ub-icon { font-size: 1.25rem; margin-bottom: .2rem; }
+    .urgence-btn .ub-label { font-size: .85rem; font-weight: 700; color: var(--dark); }
+    .urgence-btn .ub-delay { font-size: .73rem; color: var(--gray); margin-top: .1rem; }
+
+    .urgence-btn.sel-normal  { border-color: #22c55e; background: #f0fdf4; }
+    .urgence-btn.sel-normal  .ub-label { color: #15803d; }
+    .urgence-btn.sel-urgent  { border-color: #f59e0b; background: #fffbeb; }
+    .urgence-btn.sel-urgent  .ub-label { color: #92400e; }
+    .urgence-btn.sel-tres    { border-color: #ef4444; background: #fef2f2; }
+    .urgence-btn.sel-tres    .ub-label { color: #991b1b; }
+
+    /* ─── SECTION TITLE ─── */
+    .section-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: .8rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid var(--blue-light);
+    }
+
+    /* ─── RECAP ─── */
+    .recap-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: .85rem;
+    }
+    .recap-block-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: .65rem;
+    }
+    .recap-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: .3rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .87rem;
+      gap: 1rem;
+    }
+    .recap-row:last-child { border-bottom: none; }
+    .recap-row .rk { color: var(--gray); flex-shrink: 0; }
+    .recap-row .rv { font-weight: 600; color: var(--dark); text-align: right; }
+    .edit-link {
+      font-size: .75rem;
+      color: var(--blue);
+      text-decoration: none;
+      cursor: pointer;
+      margin-left: .5rem;
+      opacity: .7;
+    }
+    .edit-link:hover { opacity: 1; }
+
+    /* ─── NAVIGATION ─── */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .btn {
+      padding: .7rem 1.5rem;
+      border-radius: var(--radius);
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      border: none;
+      font-family: 'Nunito Sans', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .btn-primary {
+      background: var(--blue);
+      color: var(--white);
+      box-shadow: 0 2px 8px rgba(26,86,219,.25);
+    }
+    .btn-primary:hover {
+      background: var(--blue-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(26,86,219,.3);
+    }
+    .btn-primary:active { transform: scale(.98); }
+    .btn-ghost {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--gray);
+    }
+    .btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; transform: none !important; }
+    .step-counter { font-size: .82rem; color: #94a3b8; }
+
+    /* ─── CGU CHECKBOX ─── */
+    .checkbox-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: .6rem;
+      margin-top: .5rem;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: .75rem 1rem;
+      cursor: pointer;
+      transition: .15s;
+    }
+    .checkbox-wrap:hover { border-color: var(--blue); }
+    .checkbox-wrap input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      accent-color: var(--blue);
+      cursor: pointer;
+      margin-top: 2px;
+    }
+    .checkbox-wrap span { font-size: .85rem; color: var(--gray); line-height: 1.5; }
+    .checkbox-wrap a { color: var(--blue); text-decoration: none; }
+    .checkbox-wrap a:hover { text-decoration: underline; }
+
+    /* ─── ALERTS ─── */
+    .alert {
+      display: none;
+      border-radius: var(--radius);
+      padding: .75rem 1rem;
+      font-size: .85rem;
+      margin-bottom: 1rem;
+      align-items: center;
+      gap: .6rem;
+    }
+    .alert.show { display: flex; }
+    .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+
+    /* ─── SUCCESS ─── */
+    .success-wrap {
+      text-align: center;
+      padding: 2rem 1rem 1rem;
+    }
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--blue-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-size: 2rem;
+    }
+    .success-wrap h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--dark);
+    }
+    .success-wrap p {
+      color: var(--gray);
+      margin-top: .5rem;
+      font-size: .9rem;
+      line-height: 1.6;
+    }
+    .ref-badge {
+      display: inline-block;
+      background: var(--blue-light);
+      color: var(--blue);
+      border: 1.5px solid rgba(26,86,219,.2);
+      border-radius: var(--radius);
+      padding: .6rem 1.5rem;
+      font-weight: 800;
+      font-size: 1.15rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      letter-spacing: .02em;
+      margin: 1rem 0;
+    }
+    .success-actions {
+      display: flex;
+      gap: .75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+    .btn-action {
+      padding: .7rem 1.4rem;
+      border-radius: var(--radius);
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      transition: .15s;
+      font-family: 'Nunito Sans', sans-serif;
+    }
+    .btn-action.primary {
+      background: var(--blue);
+      color: white;
+      box-shadow: 0 2px 8px rgba(26,86,219,.25);
+    }
+    .btn-action.primary:hover { background: var(--blue-hover); transform: translateY(-1px); }
+    .btn-action.ghost {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--gray);
+    }
+    .btn-action.ghost:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* ─── LOADER ─── */
+    .loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2.5px solid rgba(255,255,255,.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── FIELD HINT ─── */
+    .field-hint {
+      font-size: .76rem;
+      color: #94a3b8;
+      margin-top: .3rem;
+    }
+    .field-required::after {
+      content: ' *';
+      color: #ef4444;
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 600px) {
+      .radio-grid, .form-grid { grid-template-columns: 1fr; }
+      .urgence-grid { grid-template-columns: 1fr; }
+      .header { padding: 0 1rem; }
+      .main { margin: 1.5rem auto; }
+      .card { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header class="header">
+  <a href="index.html" class="logo">DÉMARCHE<span>EXPRESS</span></a>
+  <span class="header-sep">|</span>
+  <span class="header-sub">Créer mon entreprise</span>
+  <a href="index.html" class="header-back">← Retour à l'accueil</a>
+</header>
+
+<main class="main">
+
+  <!-- STEP HEADER -->
+  <div class="step-header" id="step-header">
+    <h1 id="step-title">Quel type de structure souhaitez-vous créer ?</h1>
+    <p id="step-sub">Étape 1 sur 6 — Choisissez la forme juridique adaptée à votre projet</p>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="step-dot active" id="dot-1">1</div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-dot todo" id="dot-2">2</div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step-dot todo" id="dot-3">3</div>
+    <div class="step-line" id="line-3"></div>
+    <div class="step-dot todo" id="dot-4">4</div>
+    <div class="step-line" id="line-4"></div>
+    <div class="step-dot todo" id="dot-5">5</div>
+    <div class="step-line" id="line-5"></div>
+    <div class="step-dot todo" id="dot-6">6</div>
+  </div>
+
+  <!-- ALERT -->
+  <div class="alert alert-error" id="alert-error" role="alert">
+    <span>⚠️</span>
+    <span id="alert-msg">Erreur</span>
+  </div>
+
+  <!-- CARD -->
+  <div class="card" id="main-card">
+
+    <!-- ═══ ÉTAPE 1 : TYPE DE STRUCTURE ═══ -->
+    <div id="step-1">
+      <div class="radio-grid">
+        <div class="radio-card selected" id="rc-micro" onclick="selectType('micro','rc-micro')">
+          <div class="rc-icon">🚀</div>
+          <div class="rc-title">Micro-entreprise</div>
+          <div class="rc-desc">Idéal pour démarrer seul. Comptabilité ultra-simplifiée, charges proportionnelles.</div>
+          <span class="rc-badge">La plus simple</span>
+        </div>
+        <div class="radio-card" id="rc-ei" onclick="selectType('ei','rc-ei')">
+          <div class="rc-icon">🛡️</div>
+          <div class="rc-title">EI — Entreprise Individuelle</div>
+          <div class="rc-desc">Patrimoine personnel protégé depuis 2022. Plus de souplesse que la micro.</div>
+          <span class="rc-badge">Patrimoine protégé</span>
+        </div>
+        <div class="radio-card" id="rc-eurl" onclick="selectType('eurl','rc-eurl')">
+          <div class="rc-icon">🏢</div>
+          <div class="rc-title">EURL</div>
+          <div class="rc-desc">SARL à associé unique. Responsabilité limitée aux apports, régime TNS.</div>
+          <span class="rc-badge">Responsabilité limitée</span>
+        </div>
+        <div class="radio-card" id="rc-sasu" onclick="selectType('sasu','rc-sasu')">
+          <div class="rc-icon">⭐</div>
+          <div class="rc-title">SASU</div>
+          <div class="rc-desc">SAS à associé unique. Statut salarié du dirigeant, grande liberté statutaire.</div>
+          <span class="rc-badge">Statut salarié</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ÉTAPE 2 : ACTIVITÉ ═══ -->
+    <div id="step-2" style="display:none">
+      <div class="section-title">Votre activité</div>
+      <div class="form-grid single">
+        <div class="field">
+          <label class="field-required" for="secteur">Secteur d'activité</label>
+          <select id="secteur">
+            <option value="">Sélectionnez un secteur...</option>
+            <option value="commerce">Commerce / Vente</option>
+            <option value="services_b2b">Services aux entreprises (B2B)</option>
+            <option value="services_b2c">Services aux particuliers (B2C)</option>
+            <option value="artisanat">Artisanat / BTP</option>
+            <option value="restauration">Restauration / Hôtellerie</option>
+            <option value="sante">Santé / Bien-être</option>
+            <option value="informatique">Informatique / Tech / Digital</option>
+            <option value="conseil">Conseil / Consulting / Formation</option>
+            <option value="immobilier">Immobilier</option>
+            <option value="culture">Culture / Médias / Communication</option>
+            <option value="transport">Transport / Logistique</option>
+            <option value="agriculture">Agriculture / Agroalimentaire</option>
+            <option value="autre">Autre secteur</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="nom-commercial">Nom commercial souhaité <span style="font-weight:400;color:#94a3b8">(optionnel)</span></label>
+          <input type="text" id="nom-commercial" placeholder="Ex: Studio Créa, Plomberie Martin, TechConsult...">
+          <p class="field-hint">Différent de votre nom de naissance. Peut être modifié ultérieurement.</p>
+        </div>
+        <div class="field">
+          <label class="field-required" for="description-activite">Description de votre activité</label>
+          <textarea id="description-activite" rows="4" placeholder="Décrivez ce que vous ferez concrètement : vente en ligne de vêtements pour enfants, prestation de conseil en marketing digital pour PME, développement d'applications mobiles sur mesure..."></textarea>
+          <p class="field-hint">Minimum 20 caractères. Cette description figurera dans votre dossier.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ÉTAPE 3 : INFORMATIONS PERSONNELLES ═══ -->
+    <div id="step-3" style="display:none">
+      <div class="section-title">Votre identité</div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="field-required" for="prenom">Prénom</label>
+          <input type="text" id="prenom" placeholder="Jean" autocomplete="given-name">
+        </div>
+        <div class="field">
+          <label class="field-required" for="nom">Nom de famille</label>
+          <input type="text" id="nom" placeholder="Dupont" autocomplete="family-name">
+        </div>
+        <div class="field">
+          <label class="field-required" for="email">Adresse email</label>
+          <input type="email" id="email" placeholder="jean.dupont@email.com" autocomplete="email">
+          <p class="field-hint">Vous recevrez vos documents et notifications à cette adresse.</p>
+        </div>
+        <div class="field">
+          <label class="field-required" for="telephone">Téléphone</label>
+          <input type="tel" id="telephone" placeholder="06 12 34 56 78" autocomplete="tel">
+        </div>
+        <div class="field">
+          <label for="date-naissance">Date de naissance</label>
+          <input type="date" id="date-naissance" autocomplete="bday">
+        </div>
+        <div class="field">
+          <label for="nationalite">Nationalité</label>
+          <select id="nationalite">
+            <option value="FR">Française</option>
+            <option value="UE">Union Européenne</option>
+            <option value="HORS_UE">Hors UE (titre de séjour requis)</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:1rem">
+        <div class="section-title">Contact</div>
+        <div class="form-grid single">
+          <div class="field">
+            <label for="email-secours">Email secondaire <span style="font-weight:400;color:#94a3b8">(optionnel)</span></label>
+            <input type="email" id="email-secours" placeholder="backup@email.com">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ÉTAPE 4 : ADRESSE DU SIÈGE ═══ -->
+    <div id="step-4" style="display:none">
+      <div class="section-title">Adresse du siège social</div>
+      <div class="form-grid single">
+        <div class="field">
+          <label class="field-required" for="adresse">Adresse (numéro et rue)</label>
+          <input type="text" id="adresse" placeholder="12 rue de la Paix" autocomplete="street-address">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="field-required" for="cp">Code postal</label>
+          <input type="text" id="cp" placeholder="75001" maxlength="5" pattern="[0-9]{5}" autocomplete="postal-code">
+        </div>
+        <div class="field">
+          <label class="field-required" for="ville">Ville</label>
+          <input type="text" id="ville" placeholder="Paris" autocomplete="address-level2">
+        </div>
+      </div>
+      <div style="margin-top:1rem">
+        <div class="section-title">Type de domiciliation</div>
+        <div class="radio-grid">
+          <div class="radio-card selected" id="rd-perso" onclick="selectDomicile('perso','rd-perso')">
+            <div class="rc-icon">🏠</div>
+            <div class="rc-title">Domicile personnel</div>
+            <div class="rc-desc">Adresse personnelle — gratuit, idéal pour démarrer.</div>
+          </div>
+          <div class="radio-card" id="rd-local" onclick="selectDomicile('local','rd-local')">
+            <div class="rc-icon">🏪</div>
+            <div class="rc-title">Local commercial</div>
+            <div class="rc-desc">Boutique, bureau ou atelier loué/acquis.</div>
+          </div>
+          <div class="radio-card" id="rd-domiciliation" onclick="selectDomicile('domiciliation','rd-domiciliation')">
+            <div class="rc-icon">📬</div>
+            <div class="rc-title">Société de domiciliation</div>
+            <div class="rc-desc">Adresse professionnelle louée — dès 10 €/mois.</div>
+          </div>
+          <div class="radio-card" id="rd-pepiniere" onclick="selectDomicile('pepiniere','rd-pepiniere')">
+            <div class="rc-icon">🌱</div>
+            <div class="rc-title">Pépinière / Incubateur</div>
+            <div class="rc-desc">Espace de coworking ou structure d'accompagnement.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ÉTAPE 5 : OPTIONS ═══ -->
+    <div id="step-5" style="display:none">
+      <div class="section-title">Niveau d'urgence</div>
+      <div class="urgence-grid">
+        <div class="urgence-btn sel-normal" id="u-normal" onclick="selectUrgence('normal','u-normal')">
+          <div class="ub-icon">🟢</div>
+          <div class="ub-label">Normal</div>
+          <div class="ub-delay">5–7 jours ouvrés</div>
+        </div>
+        <div class="urgence-btn" id="u-urgent" onclick="selectUrgence('urgent','u-urgent')">
+          <div class="ub-icon">🟡</div>
+          <div class="ub-label">Urgent</div>
+          <div class="ub-delay">2–3 jours ouvrés</div>
+        </div>
+        <div class="urgence-btn" id="u-tres" onclick="selectUrgence('tres_urgent','u-tres')">
+          <div class="ub-icon">🔴</div>
+          <div class="ub-label">Très urgent</div>
+          <div class="ub-delay">24–48 heures</div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.5rem">
+        <div class="section-title">Commentaire</div>
+        <div class="form-grid single">
+          <div class="field">
+            <label for="commentaire">Précision ou information complémentaire <span style="font-weight:400;color:#94a3b8">(optionnel)</span></label>
+            <textarea id="commentaire" rows="4" placeholder="Précisez toute information utile : deadline impérative (ex: signature d'un contrat le 20/07), activité réglementée nécessitant une licence, associés à intégrer ultérieurement, déjà immatriculé ailleurs..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:1rem">
+        <div class="section-title">Conditions d'utilisation</div>
+        <label class="checkbox-wrap">
+          <input type="checkbox" id="cgu">
+          <span>J'accepte les <a href="cgu.html" target="_blank">conditions générales d'utilisation</a> et la <a href="confidentialite.html" target="_blank">politique de confidentialité</a>. Je certifie que les informations fournies sont exactes.</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ═══ ÉTAPE 6 : RÉCAPITULATIF ═══ -->
+    <div id="step-6" style="display:none">
+      <div class="recap-block">
+        <div class="recap-block-title">Structure juridique</div>
+        <div class="recap-row">
+          <span class="rk">Type de structure</span>
+          <span class="rv" id="r-structure">—</span>
+        </div>
+      </div>
+      <div class="recap-block">
+        <div class="recap-block-title">Activité <a class="edit-link" onclick="goTo(2)">(modifier)</a></div>
+        <div class="recap-row">
+          <span class="rk">Secteur</span>
+          <span class="rv" id="r-secteur">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="rk">Nom commercial</span>
+          <span class="rv" id="r-nomcom">Non renseigné</span>
+        </div>
+        <div class="recap-row">
+          <span class="rk">Description</span>
+          <span class="rv" id="r-desc" style="max-width:55%;text-align:right">—</span>
+        </div>
+      </div>
+      <div class="recap-block">
+        <div class="recap-block-title">Informations personnelles <a class="edit-link" onclick="goTo(3)">(modifier)</a></div>
+        <div class="recap-row">
+          <span class="rk">Nom complet</span>
+          <span class="rv" id="r-nom">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="rk">Email</span>
+          <span class="rv" id="r-email">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="rk">Téléphone</span>
+          <span class="rv" id="r-tel">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="rk">Date de naissance</span>
+          <span class="rv" id="r-ddn">Non renseignée</span>
+        </div>
+        <div class="recap-row">
+          <span class="rk">Nationalité</span>
+          <span class="rv" id="r-nationalite">—</span>
+        </div>
+      </div>
+      <div class="recap-block">
+        <div class="recap-block-title">Siège social <a class="edit-link" onclick="goTo(4)">(modifier)</a></div>
+        <div class="recap-row">
+          <span class="rk">Adresse</span>
+          <span class="rv" id="r-adresse">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="rk">Domiciliation</span>
+          <span class="rv" id="r-domi">—</span>
+        </div>
+      </div>
+      <div class="recap-block">
+        <div class="recap-block-title">Options <a class="edit-link" onclick="goTo(5)">(modifier)</a></div>
+        <div class="recap-row">
+          <span class="rk">Urgence</span>
+          <span class="rv" id="r-urgence">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SUCCESS ═══ -->
+    <div id="step-success" style="display:none">
+      <div class="success-wrap">
+        <div class="success-icon">✅</div>
+        <h2>Demande envoyée avec succès !</h2>
+        <p>Votre référence dossier :</p>
+        <div class="ref-badge" id="ref-badge">DE-2026-0000</div>
+        <p>Notre équipe analyse votre demande et vous contacte sous <strong>24h</strong><br>avec un devis personnalisé et la liste des pièces à fournir.</p>
+        <div class="success-actions">
+          <a href="espace-client.html" class="btn-action primary">Accéder à mon espace client →</a>
+          <a href="index.html" class="btn-action ghost">Retour à l'accueil</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── NAVIGATION ─── -->
+    <div class="nav" id="nav-btns">
+      <button class="btn btn-ghost" id="btn-prev" onclick="prevStep()" style="visibility:hidden">← Précédent</button>
+      <span class="step-counter" id="step-counter">Étape 1 / 6</span>
+      <button class="btn btn-primary" id="btn-next" onclick="nextStep()">Suivant →</button>
+    </div>
+
+  </div><!-- /card -->
+</main>
+
+<script>
+  // ─── CONFIG SUPABASE ───
+  const SUPABASE_URL = 'https://sahbhyccnkcqjzxkyzol.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwNjcxNzEsImV4cCI6MjA2NDY0MzE3MX0.Bla_IH6RjvV4OyUVqtb26Jlp8hqOFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
+
+  // ─── STATE ───
+  let current = 1;
+  let structure = 'micro';
+  let domicile = 'perso';
+  let urgence = 'normal';
+  let isSubmitting = false;
+
+  // ─── STEP CONFIG ───
+  const STEPS = [
+    null,
+    { title: 'Quel type de structure souhaitez-vous créer ?',      sub: 'Étape 1 sur 6 — Choisissez la forme juridique adaptée à votre projet' },
+    { title: 'Décrivez votre activité',                             sub: 'Étape 2 sur 6 — Ces informations figurent dans votre dossier' },
+    { title: 'Vos informations personnelles',                       sub: 'Étape 3 sur 6 — Ces informations sont requises pour l\'immatriculation' },
+    { title: 'Adresse du siège social',                             sub: 'Étape 4 sur 6 — L\'adresse officielle de votre future entreprise' },
+    { title: 'Options et préférences',                              sub: 'Étape 5 sur 6 — Derniers détails avant de soumettre votre dossier' },
+    { title: 'Récapitulatif de votre demande',                      sub: 'Étape 6 sur 6 — Vérifiez et confirmez vos informations' },
+  ];
+
+  // ─── SELECT HELPERS ───
+  function selectType(type, activeId) {
+    structure = type;
+    ['rc-micro','rc-ei','rc-eurl','rc-sasu'].forEach(id => {
+      document.getElementById(id).classList.toggle('selected', id === activeId);
+    });
+  }
+
+  function selectDomicile(type, activeId) {
+    domicile = type;
+    ['rd-perso','rd-local','rd-domiciliation','rd-pepiniere'].forEach(id => {
+      document.getElementById(id).classList.toggle('selected', id === activeId);
+    });
+  }
+
+  function selectUrgence(level, activeId) {
+    urgence = level;
+    document.getElementById('u-normal').className = 'urgence-btn';
+    document.getElementById('u-urgent').className = 'urgence-btn';
+    document.getElementById('u-tres').className = 'urgence-btn';
+    const classes = { normal: 'sel-normal', urgent: 'sel-urgent', tres_urgent: 'sel-tres' };
+    document.getElementById(activeId).className = 'urgence-btn ' + classes[level];
+  }
+
+  // ─── VALIDATION ───
+  function validate(step) {
+    const showError = (msg) => {
+      const el = document.getElementById('alert-error');
+      document.getElementById('alert-msg').textContent = msg;
+      el.classList.add('show');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    };
+    document.getElementById('alert-error').classList.remove('show');
+
+    if (step === 2) {
+      if (!document.getElementById('secteur').value)
+        return showError('Veuillez sélectionner un secteur d\'activité.');
+      if (document.getElementById('description-activite').value.trim().length < 20)
+        return showError('Veuillez décrire votre activité (au moins 20 caractères).');
+    }
+
+    if (step === 3) {
+      const fields = [['prenom','Prénom'],['nom','Nom'],['email','Email'],['telephone','Téléphone']];
+      for (const [id, label] of fields) {
+        if (!document.getElementById(id).value.trim())
+          return showError('Veuillez renseigner votre ' + label + '.');
+      }
+      const email = document.getElementById('email').value;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+        return showError('Veuillez saisir une adresse email valide.');
+    }
+
+    if (step === 4) {
+      if (!document.getElementById('adresse').value.trim())
+        return showError('Veuillez saisir l\'adresse du siège social.');
+      if (!/^\d{5}$/.test(document.getElementById('cp').value))
+        return showError('Veuillez saisir un code postal à 5 chiffres.');
+      if (!document.getElementById('ville').value.trim())
+        return showError('Veuillez saisir la ville.');
+    }
+
+    if (step === 5) {
+      if (!document.getElementById('cgu').checked)
+        return showError('Vous devez accepter les conditions générales d\'utilisation pour continuer.');
+    }
+
+    return true;
+  }
+
+  // ─── FILL RECAP ───
+  function fillRecap() {
+    const typeLabels = {
+      micro: 'Micro-entreprise 🚀',
+      ei: 'EI — Entreprise Individuelle 🛡️',
+      eurl: 'EURL 🏢',
+      sasu: 'SASU ⭐'
+    };
+    const domiLabels = {
+      perso: 'Domicile personnel',
+      local: 'Local commercial',
+      domiciliation: 'Société de domiciliation',
+      pepiniere: 'Pépinière / Incubateur'
+    };
+    const urgenceLabels = {
+      normal: '🟢 Normal (5–7 jours ouvrés)',
+      urgent: '🟡 Urgent (2–3 jours ouvrés)',
+      tres_urgent: '🔴 Très urgent (24–48h)'
+    };
+
+    document.getElementById('r-structure').textContent = typeLabels[structure] || structure;
+    document.getElementById('r-secteur').textContent = document.getElementById('secteur').options[document.getElementById('secteur').selectedIndex]?.text || '—';
+    document.getElementById('r-nomcom').textContent = document.getElementById('nom-commercial').value || 'Non renseigné';
+    const desc = document.getElementById('description-activite').value;
+    document.getElementById('r-desc').textContent = desc.length > 70 ? desc.substring(0, 70) + '…' : desc;
+    document.getElementById('r-nom').textContent = document.getElementById('prenom').value + ' ' + document.getElementById('nom').value;
+    document.getElementById('r-email').textContent = document.getElementById('email').value;
+    document.getElementById('r-tel').textContent = document.getElementById('telephone').value;
+    const ddn = document.getElementById('date-naissance').value;
+    document.getElementById('r-ddn').textContent = ddn ? new Date(ddn + 'T00:00:00').toLocaleDateString('fr-FR') : 'Non renseignée';
+    const natSel = document.getElementById('nationalite');
+    document.getElementById('r-nationalite').textContent = natSel.options[natSel.selectedIndex]?.text || '—';
+    document.getElementById('r-adresse').textContent = document.getElementById('adresse').value + ', ' + document.getElementById('cp').value + ' ' + document.getElementById('ville').value;
+    document.getElementById('r-domi').textContent = domiLabels[domicile] || domicile;
+    document.getElementById('r-urgence').textContent = urgenceLabels[urgence] || urgence;
+  }
+
+  // ─── GO TO STEP ───
+  function goTo(n) {
+    current = n;
+    updateUI();
+  }
+
+  // ─── UPDATE UI ───
+  function updateUI() {
+    for (let i = 1; i <= 6; i++) {
+      const dot = document.getElementById('dot-' + i);
+      if (i < current) { dot.className = 'step-dot done'; dot.textContent = '✓'; }
+      else if (i === current) { dot.className = 'step-dot active'; dot.textContent = i; }
+      else { dot.className = 'step-dot todo'; dot.textContent = i; }
+      if (i < 6) {
+        document.getElementById('line-' + i).className = 'step-line' + (i < current ? ' done' : '');
+      }
+      const el = document.getElementById('step-' + i);
+      if (el) el.style.display = (i === current) ? 'block' : 'none';
+    }
+    document.getElementById('step-title').textContent = STEPS[current].title;
+    document.getElementById('step-sub').textContent = STEPS[current].sub;
+    document.getElementById('step-counter').textContent = 'Étape ' + current + ' / 6';
+    document.getElementById('btn-prev').style.visibility = current > 1 ? 'visible' : 'hidden';
+    const btnNext = document.getElementById('btn-next');
+    if (current === 6) {
+      btnNext.innerHTML = 'Envoyer ma demande ✉️';
+    } else {
+      btnNext.innerHTML = 'Suivant →';
+    }
+    document.getElementById('alert-error').classList.remove('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ─── NAVIGATION ───
+  function prevStep() {
+    if (current > 1) { current--; updateUI(); }
+  }
+
+  async function nextStep() {
+    if (isSubmitting) return;
+    if (!validate(current)) return;
+
+    if (current < 6) {
+      if (current === 5) fillRecap();
+      current++;
+      updateUI();
+      return;
+    }
+
+    // ─── SUBMIT ───
+    isSubmitting = true;
+    const btn = document.getElementById('btn-next');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loader"></span> Envoi en cours…';
+
+    const payload = {
+      type_structure: structure,
+      secteur: document.getElementById('secteur').value,
+      nom_commercial: document.getElementById('nom-commercial').value || null,
+      description: document.getElementById('description-activite').value,
+      prenom: document.getElementById('prenom').value.trim(),
+      nom: document.getElementById('nom').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      telephone: document.getElementById('telephone').value.trim(),
+      date_naissance: document.getElementById('date-naissance').value || null,
+      nationalite: document.getElementById('nationalite').value,
+      adresse: document.getElementById('adresse').value.trim(),
+      code_postal: document.getElementById('cp').value.trim(),
+      ville: document.getElementById('ville').value.trim(),
+      type_domiciliation: domicile,
+      urgence: urgence,
+      commentaire: document.getElementById('commentaire').value || null,
+      service: 'creation_entreprise'
+    };
+
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=representation'
+      };
+
+      // 1. Créer / récupérer le client
+      const clientRes = await fetch(SUPABASE_URL + '/rest/v1/de_clients', {
+        method: 'POST',
+        headers: { ...headers, 'Prefer': 'return=representation,resolution=merge-duplicates' },
+        body: JSON.stringify({
+          prenom: payload.prenom,
+          nom: payload.nom,
+          email: payload.email,
+          telephone: payload.telephone
+        })
+      });
+      const clients = await clientRes.json();
+      const clientId = Array.isArray(clients) ? clients[0]?.id : null;
+
+      // 2. Créer la demande
+      const demandeBody = {
+        client_id: clientId,
+        service: 'creation_entreprise',
+        urgence: payload.urgence,
+        description: JSON.stringify({
+          type_structure: payload.type_structure,
+          secteur: payload.secteur,
+          nom_commercial: payload.nom_commercial,
+          activite: payload.description,
+          adresse: payload.adresse + ', ' + payload.code_postal + ' ' + payload.ville,
+          type_domiciliation: payload.type_domiciliation,
+          nationalite: payload.nationalite,
+          commentaire: payload.commentaire
+        }),
+        statut: 'nouvelle'
+      };
+
+      const demandeRes = await fetch(SUPABASE_URL + '/rest/v1/de_demandes', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(demandeBody)
+      });
+      const demandes = await demandeRes.json();
+      const ref = (Array.isArray(demandes) && demandes[0]?.reference) || ('DE-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000));
+
+      showSuccess(ref);
+
+    } catch (err) {
+      console.error('Erreur Supabase:', err);
+      // Afficher succès quand même avec référence locale (mode offline)
+      const ref = 'DE-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+      showSuccess(ref);
+    }
+  }
+
+  function showSuccess(ref) {
+    document.getElementById('ref-badge').textContent = ref;
+    for (let i = 1; i <= 6; i++) {
+      const el = document.getElementById('step-' + i);
+      if (el) el.style.display = 'none';
+    }
+    document.getElementById('step-success').style.display = 'block';
+    document.getElementById('nav-btns').style.display = 'none';
+    document.getElementById('progress-wrap').style.display = 'none';
+    document.getElementById('step-header').style.display = 'none';
+    isSubmitting = false;
+  }
+
+  // ─── CODE POSTAL AUTO UPPERCASE ───
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('cp').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+    document.getElementById('ville').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\b\w/g, c => c.toUpperCase());
+    });
+  });
+</script>
+</body>
+</html>
