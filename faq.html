@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ — DémarcheExpress</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --blue:#1a56db;--blue-light:#e8f0fe;--dark:#0f172a;--gray:#475569;--bg:#f7f8fc;--border:#e2e8f0;--radius:10px;--radius-lg:20px; }
+    body { font-family:'Nunito Sans',system-ui,sans-serif; background:var(--bg); color:var(--dark); }
+    header { background:rgba(255,255,255,.97); border-bottom:1px solid var(--border); padding:0 2rem; display:flex; align-items:center; height:64px; gap:1.5rem; position:sticky; top:0; z-index:100; }
+    .logo { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.2rem; color:var(--blue); text-decoration:none; }
+    .logo span { color:var(--dark); }
+    nav { margin-left:auto; display:flex; gap:1.5rem; align-items:center; }
+    nav a { font-size:.88rem; color:var(--gray); text-decoration:none; }
+    nav a:hover { color:var(--blue); }
+    .btn-nav { background:var(--blue); color:white !important; padding:.5rem 1.1rem; border-radius:var(--radius); font-weight:600; }
+    main { max-width:760px; margin:3rem auto; padding:0 1.5rem 4rem; }
+    h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:2rem; font-weight:800; text-align:center; margin-bottom:.5rem; }
+    .subtitle { text-align:center; color:var(--gray); margin-bottom:2.5rem; }
+    .faq-item { background:white; border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:.6rem; overflow:hidden; }
+    .faq-q { padding:1.1rem 1.25rem; font-weight:700; font-size:.92rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:1rem; color:var(--dark); }
+    .faq-q:hover { background:var(--bg); }
+    .faq-arrow { color:var(--blue); font-size:1.1rem; transition:.2s; flex-shrink:0; }
+    .faq-item.open .faq-arrow { transform:rotate(45deg); }
+    .faq-a { display:none; padding:0 1.25rem 1.1rem; font-size:.87rem; color:var(--gray); line-height:1.7; border-top:1px solid var(--border); }
+    .faq-item.open .faq-a { display:block; }
+    .faq-section { font-family:'Plus Jakarta Sans',sans-serif; font-size:.75rem; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:.07em; margin:2rem 0 .75rem; }
+    footer { background:var(--dark); color:#94a3b8; padding:3rem 1.5rem; text-align:center; font-size:.83rem; }
+    footer a { color:#94a3b8; text-decoration:none; margin:0 .75rem; }
+  </style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="logo">DÉMARCHE<span>EXPRESS</span></a>
+  <nav>
+    <a href="services.html">Services</a>
+    <a href="faq.html" style="color:var(--blue);font-weight:600">FAQ</a>
+    <a href="contact.html">Contact</a>
+    <a href="login-client.html" class="btn-nav">Mon espace</a>
+  </nav>
+</header>
+<main>
+  <h1>Questions fréquentes</h1>
+  <p class="subtitle">Tout ce que vous devez savoir sur nos services.</p>
+
+  <div class="faq-section">Général</div>
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">Qu'est-ce que DémarcheExpress ? <span class="faq-arrow">+</span></div><div class="faq-a">DémarcheExpress est un service en ligne qui vous accompagne dans toutes vos formalités administratives d'entreprise : création, modification, fermeture et obtention de Kbis. Nous gérons les démarches auprès du greffe à votre place.</div></div>
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">Êtes-vous une plateforme officielle ? <span class="faq-arrow">+</span></div><div class="faq-a">Nous sommes un prestataire privé de services juridiques. Nous ne sommes pas le greffe ou l'INPI, mais nous déposons votre dossier auprès des autorités compétentes en votre nom.</div></div>
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">Quels délais pour créer mon entreprise ? <span class="faq-arrow">+</span></div><div class="faq-a">En mode normal (5–7 jours ouvrés), urgent (2–3 jours) ou très urgent (24–48h). Ces délais courent à partir de la réception de votre dossier complet.</div></div>
+
+  <div class="faq-section">Tarifs & paiement</div>
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">Quels sont vos tarifs ? <span class="faq-arrow">+</span></div><div class="faq-a">Nos honoraires démarrent à 149 € HT pour une création d'entreprise, auxquels s'ajoutent les frais de greffe (environ 66,88 €) et, si nécessaire, les frais de publication d'annonce légale (environ 138 €). Vous recevez un devis détaillé avant tout engagement.</div></div>
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">Quand dois-je payer ? <span class="faq-arrow">+</span></div><div class="faq-a">Le paiement intervient après acceptation de votre devis. Aucun prélèvement avant votre accord explicite.</div></div>
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">Quels moyens de paiement acceptez-vous ? <span class="faq-arrow">+</span></div><div class="faq-a">Carte bancaire (Visa, Mastercard) via Stripe, virement bancaire. Le paiement est sécurisé et crypté.</div></div>
+
+  <div class="faq-section">Dossier & documents</div>
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">Quels documents dois-je fournir ? <span class="faq-arrow">+</span></div><div class="faq-a">Selon votre situation : pièce d'identité, justificatif de domicile, RIB pour le dépôt de capital (EURL/SASU). L'équipe vous transmet la liste exacte dans votre espace client après étude de votre dossier.</div></div>
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">Mes documents sont-ils sécurisés ? <span class="faq-arrow">+</span></div><div class="faq-a">Oui. Tous les fichiers sont stockés sur Supabase Storage (infrastructure AWS en Europe), chiffrés au repos et en transit. Seuls vous et notre équipe y avez accès.</div></div>
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">Comment suivre l'avancement de mon dossier ? <span class="faq-arrow">+</span></div><div class="faq-a">Via votre espace client accessible 24h/24. Chaque changement de statut vous est notifié par email. Vous pouvez aussi contacter notre équipe par messagerie directement dans l'espace client.</div></div>
+
+  <div class="faq-section">Après la création</div>
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">Quand vais-je recevoir mon Kbis ? <span class="faq-arrow">+</span></div><div class="faq-a">Le Kbis est délivré par le greffe une fois votre dossier validé. Il est disponible en téléchargement PDF dans votre espace client dès réception.</div></div>
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">Pouvez-vous m'aider après la création ? <span class="faq-arrow">+</span></div><div class="faq-a">Oui ! Nous gérons aussi les modifications (changement de siège, gérant, etc.) et les fermetures. Vous pouvez soumettre une nouvelle demande à tout moment depuis votre espace client.</div></div>
+</main>
+<footer>
+  <p><a href="index.html">Accueil</a><a href="services.html">Services</a><a href="contact.html">Contact</a><a href="mentions-legales.html">Mentions légales</a></p>
+  <p style="margin-top:.75rem">© 2026 DémarcheExpress</p>
+</footer>
+<script>
+function toggle(el) {
+  const item = el.closest('.faq-item');
+  item.classList.toggle('open');
+}
+</script>
+</body>
+</html>
