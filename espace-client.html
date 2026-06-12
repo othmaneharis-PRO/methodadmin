@@ -96,7 +96,7 @@
           <div class="loading"><div class="spinner"></div> Chargement…</div>
         </div>
         <div class="msg-input-row">
-          <input class="msg-input" type="text" id="msg-input" placeholder="Votre message…">
+          <input class="msg-input" type="text" id="msg-input" maxlength="1000" placeholder="Votre message…" onkeydown="if(event.key==='Enter'){event.preventDefault();sendMessage();}">
           <button class="btn-primary" onclick="sendMessage()">Envoyer</button>
         </div>
       </div>
@@ -121,6 +121,17 @@ let currentUser = null; let clientId = null;
 
 const svcLabels = { creation_entreprise:'Création d\'entreprise', modification:'Modification', fermeture:'Fermeture / Radiation', kbis:'Extrait Kbis' };
 
+// Échappe le HTML pour empêcher les injections XSS via les données utilisateur
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 async function init() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) { window.location.href = 'login-client.html'; return; }
@@ -132,7 +143,7 @@ async function init() {
 }
 
 async function loadClient() {
-  const { data } = await supabase.from('de_clients').select('id').eq('email', currentUser.email).single();
+  const { data } = await supabase.from('de_clients').select('id').eq('email', currentUser.email).maybeSingle();
   if (data) clientId = data.id;
 }
 
@@ -144,8 +155,8 @@ async function loadDossiers() {
   container.innerHTML = data.map(d => `
     <div class="dossier-card">
       <div>
-        <div class="dossier-ref">${d.reference || d.id.slice(0,8).toUpperCase()}</div>
-        <div class="dossier-service">${svcLabels[d.service] || d.service}</div>
+        <div class="dossier-ref">${escapeHtml(d.reference) || d.id.slice(0,8).toUpperCase()}</div>
+        <div class="dossier-service">${escapeHtml(svcLabels[d.service] || d.service)}</div>
       </div>
       <span class="badge badge-${d.statut}">${statutLabel(d.statut)}</span>
       <span class="dossier-date">${new Date(d.created_at).toLocaleDateString('fr-FR')}</span>
@@ -161,7 +172,7 @@ async function loadMessages() {
   container.innerHTML = data.map(m => `
     <div class="msg-bubble ${m.auteur === 'client' ? 'mine' : ''}">
       <div class="msg-meta">${m.auteur === 'client' ? 'Vous' : 'MethodAdmin'} · ${new Date(m.created_at).toLocaleString('fr-FR')}</div>
-      <div class="msg-text">${m.contenu}</div>
+      <div class="msg-text">${escapeHtml(m.contenu)}</div>
     </div>
   `).join('');
   container.scrollTop = container.scrollHeight;
@@ -175,8 +186,10 @@ async function loadDocuments() {
 async function sendMessage() {
   const input = document.getElementById('msg-input');
   const txt = input.value.trim();
-  if (!txt || !clientId) return;
-  await supabase.from('de_messages').insert({ client_id: clientId, contenu: txt, auteur: 'client' });
+  if (!txt) return;
+  if (!clientId) { alert('Impossible d\'envoyer un message : votre profil client n\'est pas encore lié. Contactez le support.'); return; }
+  const { error } = await supabase.from('de_messages').insert({ client_id: clientId, contenu: txt, auteur: 'client' });
+  if (error) { alert('Erreur lors de l\'envoi du message. Veuillez réessayer.'); return; }
   input.value = '';
   await loadMessages();
 }
