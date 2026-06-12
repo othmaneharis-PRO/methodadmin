@@ -649,12 +649,12 @@
         </div>
         <div class="field">
           <label for="nom-commercial">Nom commercial souhaité <span style="font-weight:400;color:#94a3b8">(optionnel)</span></label>
-          <input type="text" id="nom-commercial" placeholder="Ex: Studio Créa, Plomberie Martin, TechConsult...">
+          <input type="text" id="nom-commercial" maxlength="100" placeholder="Ex: Studio Créa, Plomberie Martin, TechConsult...">
           <p class="field-hint">Différent de votre nom de naissance. Peut être modifié ultérieurement.</p>
         </div>
         <div class="field">
           <label class="field-required" for="description-activite">Description de votre activité</label>
-          <textarea id="description-activite" rows="4" placeholder="Décrivez ce que vous ferez concrètement : vente en ligne de vêtements pour enfants, prestation de conseil en marketing digital pour PME, développement d'applications mobiles sur mesure..."></textarea>
+          <textarea id="description-activite" rows="4" maxlength="1000" placeholder="Décrivez ce que vous ferez concrètement : vente en ligne de vêtements pour enfants, prestation de conseil en marketing digital pour PME, développement d'applications mobiles sur mesure..."></textarea>
           <p class="field-hint">Minimum 20 caractères. Cette description figurera dans votre dossier.</p>
         </div>
       </div>
@@ -666,20 +666,20 @@
       <div class="form-grid">
         <div class="field">
           <label class="field-required" for="prenom">Prénom</label>
-          <input type="text" id="prenom" placeholder="Jean" autocomplete="given-name">
+          <input type="text" id="prenom" maxlength="60" placeholder="Jean" autocomplete="given-name">
         </div>
         <div class="field">
           <label class="field-required" for="nom">Nom de famille</label>
-          <input type="text" id="nom" placeholder="Dupont" autocomplete="family-name">
+          <input type="text" id="nom" maxlength="60" placeholder="Dupont" autocomplete="family-name">
         </div>
         <div class="field">
           <label class="field-required" for="email">Adresse email</label>
-          <input type="email" id="email" placeholder="jean.dupont@email.com" autocomplete="email">
+          <input type="email" id="email" maxlength="120" placeholder="jean.dupont@email.com" autocomplete="email">
           <p class="field-hint">Vous recevrez vos documents et notifications à cette adresse.</p>
         </div>
         <div class="field">
           <label class="field-required" for="telephone">Téléphone</label>
-          <input type="tel" id="telephone" placeholder="06 12 34 56 78" autocomplete="tel">
+          <input type="tel" id="telephone" maxlength="20" placeholder="06 12 34 56 78" autocomplete="tel">
         </div>
         <div class="field">
           <label for="date-naissance">Date de naissance</label>
@@ -699,7 +699,7 @@
         <div class="form-grid single">
           <div class="field">
             <label for="email-secours">Email secondaire <span style="font-weight:400;color:#94a3b8">(optionnel)</span></label>
-            <input type="email" id="email-secours" placeholder="backup@email.com">
+            <input type="email" id="email-secours" maxlength="120" placeholder="backup@email.com">
           </div>
         </div>
       </div>
@@ -711,17 +711,17 @@
       <div class="form-grid single">
         <div class="field">
           <label class="field-required" for="adresse">Adresse (numéro et rue)</label>
-          <input type="text" id="adresse" placeholder="12 rue de la Paix" autocomplete="street-address">
+          <input type="text" id="adresse" maxlength="150" placeholder="12 rue de la Paix" autocomplete="street-address">
         </div>
       </div>
       <div class="form-grid">
         <div class="field">
           <label class="field-required" for="cp">Code postal</label>
-          <input type="text" id="cp" placeholder="75001" maxlength="5" pattern="[0-9]{5}" autocomplete="postal-code">
+          <input type="text" id="cp" maxlength="5" placeholder="75001" maxlength="5" pattern="[0-9]{5}" autocomplete="postal-code">
         </div>
         <div class="field">
           <label class="field-required" for="ville">Ville</label>
-          <input type="text" id="ville" placeholder="Paris" autocomplete="address-level2">
+          <input type="text" id="ville" maxlength="80" placeholder="Paris" autocomplete="address-level2">
         </div>
       </div>
       <div style="margin-top:1rem">
@@ -777,7 +777,7 @@
         <div class="form-grid single">
           <div class="field">
             <label for="commentaire">Précision ou information complémentaire <span style="font-weight:400;color:#94a3b8">(optionnel)</span></label>
-            <textarea id="commentaire" rows="4" placeholder="Précisez toute information utile : deadline impérative (ex: signature d'un contrat le 20/07), activité réglementée nécessitant une licence, associés à intégrer ultérieurement, déjà immatriculé ailleurs..."></textarea>
+            <textarea id="commentaire" rows="4" maxlength="1000" placeholder="Précisez toute information utile : deadline impérative (ex: signature d'un contrat le 20/07), activité réglementée nécessitant une licence, associés à intégrer ultérieurement, déjà immatriculé ailleurs..."></textarea>
           </div>
         </div>
       </div>
@@ -1096,8 +1096,8 @@
         'Prefer': 'return=representation'
       };
 
-      // 1. Créer / récupérer le client
-      const clientRes = await fetch(SUPABASE_URL + '/rest/v1/de_clients', {
+      // 1. Créer / récupérer le client (upsert sur l'email)
+      const clientRes = await fetch(SUPABASE_URL + '/rest/v1/de_clients?on_conflict=email', {
         method: 'POST',
         headers: { ...headers, 'Prefer': 'return=representation,resolution=merge-duplicates' },
         body: JSON.stringify({
@@ -1107,8 +1107,19 @@
           telephone: payload.telephone
         })
       });
-      const clients = await clientRes.json();
-      const clientId = Array.isArray(clients) ? clients[0]?.id : null;
+      let clientId = null;
+      if (clientRes.ok) {
+        const clients = await clientRes.json();
+        clientId = Array.isArray(clients) ? clients[0]?.id : null;
+      }
+      // Si l'upsert n'a pas retourné d'id (pas de contrainte unique configurée), on récupère le client par email
+      if (!clientId) {
+        const lookupRes = await fetch(SUPABASE_URL + '/rest/v1/de_clients?email=eq.' + encodeURIComponent(payload.email) + '&select=id&order=created_at.desc&limit=1', { headers });
+        if (lookupRes.ok) {
+          const lookup = await lookupRes.json();
+          clientId = Array.isArray(lookup) ? lookup[0]?.id : null;
+        }
+      }
 
       // 2. Créer la demande
       const demandeBody = {
@@ -1133,6 +1144,7 @@
         headers,
         body: JSON.stringify(demandeBody)
       });
+      if (!demandeRes.ok) throw new Error('Insertion de la demande échouée (HTTP ' + demandeRes.status + ')');
       const demandes = await demandeRes.json();
       const ref = (Array.isArray(demandes) && demandes[0]?.reference) || ('DE-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000));
 
