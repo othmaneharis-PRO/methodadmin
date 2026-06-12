@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mon Espace — Methodamin</title>
+  <title>Mon Espace — MethodAdmin</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -61,7 +61,7 @@
 </head>
 <body>
 <header>
-  <a href="index.html" class="logo">METHOD<span>AMIN</span></a>
+  <a href="index.html" class="logo">METHOD<span>ADMIN</span></a>
   <div class="user-info">
     <span class="user-badge" id="user-name">Chargement…</span>
     <button class="btn-logout" onclick="logout()">Déconnexion</button>
@@ -160,7 +160,7 @@ async function loadMessages() {
   if (!data || data.length === 0) { container.innerHTML = '<p style="text-align:center;color:var(--gray);font-size:.85rem;padding:1rem">Aucun message pour l\'instant.</p>'; return; }
   container.innerHTML = data.map(m => `
     <div class="msg-bubble ${m.auteur === 'client' ? 'mine' : ''}">
-      <div class="msg-meta">${m.auteur === 'client' ? 'Vous' : 'Methodamin'} · ${new Date(m.created_at).toLocaleString('fr-FR')}</div>
+      <div class="msg-meta">${m.auteur === 'client' ? 'Vous' : 'MethodAdmin'} · ${new Date(m.created_at).toLocaleString('fr-FR')}</div>
       <div class="msg-text">${m.contenu}</div>
     </div>
   `).join('');
