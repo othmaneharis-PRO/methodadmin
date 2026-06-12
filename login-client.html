@@ -143,7 +143,9 @@ async function doLogin() {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) { showError('Email ou mot de passe incorrect.'); btn.disabled=false; btn.textContent='Se connecter'; return; }
   if (currentSpace === 'admin') {
-    const role = data.user?.user_metadata?.role;
+    // SÉCURITÉ : on vérifie app_metadata (modifiable uniquement côté serveur via service_role),
+    // jamais user_metadata (que l'utilisateur peut modifier lui-même via auth.updateUser()).
+    const role = data.user?.app_metadata?.role;
     if (role !== 'admin') { await supabase.auth.signOut(); showError('Accès refusé. Ce compte n\'a pas les droits administrateur.'); btn.disabled=false; btn.textContent='Se connecter'; return; }
     window.location.href = 'espace-admin.html';
   } else {
