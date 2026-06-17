@@ -104,7 +104,7 @@
 
 <script>
 const SUPABASE_URL = 'https://sahbhyccnkcqjzxkyzol.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwNjcxNzEsImV4cCI6MjA2NDY0MzE3MX0.Bla_IH6RjvV4OyUVqtb26Jlp8hqOFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDk2NTYsImV4cCI6MjA5MDE4NTY1Nn0.oFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentSpace = 'client';
@@ -143,10 +143,11 @@ async function doLogin() {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) { showError('Email ou mot de passe incorrect.'); btn.disabled=false; btn.textContent='Se connecter'; return; }
   if (currentSpace === 'admin') {
-    // SÉCURITÉ : on vérifie app_metadata (modifiable uniquement côté serveur via service_role),
-    // jamais user_metadata (que l'utilisateur peut modifier lui-même via auth.updateUser()).
-    const role = data.user?.app_metadata?.role;
-    if (role !== 'admin') { await supabase.auth.signOut(); showError('Accès refusé. Ce compte n\'a pas les droits administrateur.'); btn.disabled=false; btn.textContent='Se connecter'; return; }
+    // SÉCURITÉ : la source de vérité du rôle est profiles.role, protégée par RLS
+    // (un client ne peut lire que son propre profil) et par un trigger anti-escalade
+    // (impossible de se définir soi-même admin via UPDATE).
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+    if (!profile || profile.role !== 'admin') { await supabase.auth.signOut(); showError('Accès refusé. Ce compte n\'a pas les droits administrateur.'); btn.disabled=false; btn.textContent='Se connecter'; return; }
     window.location.href = 'espace-admin.html';
   } else {
     window.location.href = 'espace-client.html';
@@ -164,7 +165,9 @@ async function doRegister() {
   if (password !== confirm) return showError('Les mots de passe ne correspondent pas.');
   const btn = document.getElementById('btn-register');
   btn.disabled=true; btn.innerHTML='Création…<span class="loader"></span>';
-  const { error } = await supabase.auth.signUp({ email, password, options: { data: { prenom, nom, role: 'client' } } });
+  // Note : "role" n'est plus envoyé ici — le trigger handle_new_user() force toujours
+  // 'client' pour toute inscription publique, indépendamment de ce que contient ce payload.
+  const { error } = await supabase.auth.signUp({ email, password, options: { data: { prenom, nom } } });
   if (error) { showError(error.message); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
   showSuccess('Compte créé ! Vérifiez votre email pour confirmer votre inscription.');
   btn.disabled=false; btn.textContent='Créer mon compte';
