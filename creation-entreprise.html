@@ -6,6 +6,7 @@
   <title>Créer mon entreprise — MethodAdmin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -886,7 +887,8 @@
 <script>
   // ─── CONFIG SUPABASE ───
   const SUPABASE_URL = 'https://sahbhyccnkcqjzxkyzol.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwNjcxNzEsImV4cCI6MjA2NDY0MzE3MX0.Bla_IH6RjvV4OyUVqtb26Jlp8hqOFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDk2NTYsImV4cCI6MjA5MDE4NTY1Nn0.oFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // ─── STATE ───
   let current = 1;
@@ -1068,93 +1070,46 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="loader"></span> Envoi en cours…';
 
-    const payload = {
-      type_structure: structure,
-      secteur: document.getElementById('secteur').value,
-      nom_commercial: document.getElementById('nom-commercial').value || null,
-      description: document.getElementById('description-activite').value,
-      prenom: document.getElementById('prenom').value.trim(),
-      nom: document.getElementById('nom').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      telephone: document.getElementById('telephone').value.trim(),
-      date_naissance: document.getElementById('date-naissance').value || null,
-      nationalite: document.getElementById('nationalite').value,
-      adresse: document.getElementById('adresse').value.trim(),
-      code_postal: document.getElementById('cp').value.trim(),
-      ville: document.getElementById('ville').value.trim(),
-      type_domiciliation: domicile,
-      urgence: urgence,
-      commentaire: document.getElementById('commentaire').value || null,
-      service: 'creation_entreprise'
-    };
+    // Le type de structure (micro/EI/EURL/SASU) n'est pas un champ de la base ;
+    // on l'intègre dans la description avec le reste des détails du projet.
+    const descriptionComplete = [
+      'Type de structure : ' + (structure === 'micro' ? 'Micro-entreprise' : structure === 'ei' ? 'EI' : structure === 'eurl' ? 'EURL' : 'SASU'),
+      'Secteur : ' + document.getElementById('secteur').value,
+      document.getElementById('nom-commercial').value ? 'Nom commercial : ' + document.getElementById('nom-commercial').value : null,
+      'Activité : ' + document.getElementById('description-activite').value,
+      'Adresse du siège : ' + document.getElementById('adresse').value + ', ' + document.getElementById('cp').value + ' ' + document.getElementById('ville').value + ' (' + domicile + ')',
+      'Nationalité : ' + document.getElementById('nationalite').value,
+      document.getElementById('commentaire').value ? 'Commentaire : ' + document.getElementById('commentaire').value : null
+    ].filter(Boolean).join('\n');
+
+    // L'enum urgence_type utilise "tres-urgent" (avec un tiret), pas "tres_urgent"
+    const urgenceDb = urgence === 'tres_urgent' ? 'tres-urgent' : urgence;
 
     try {
-      const headers = {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Prefer': 'return=representation'
-      };
-
-      // 1. Créer / récupérer le client (upsert sur l'email)
-      const clientRes = await fetch(SUPABASE_URL + '/rest/v1/de_clients?on_conflict=email', {
-        method: 'POST',
-        headers: { ...headers, 'Prefer': 'return=representation,resolution=merge-duplicates' },
-        body: JSON.stringify({
-          prenom: payload.prenom,
-          nom: payload.nom,
-          email: payload.email,
-          telephone: payload.telephone
-        })
+      const { data, error } = await supabase.rpc('soumettre_demande', {
+        p_prenom: document.getElementById('prenom').value.trim(),
+        p_nom: document.getElementById('nom').value.trim(),
+        p_email: document.getElementById('email').value.trim(),
+        p_telephone: document.getElementById('telephone').value.trim(),
+        p_service: 'creation',
+        p_description: descriptionComplete,
+        p_urgence: urgenceDb
       });
-      let clientId = null;
-      if (clientRes.ok) {
-        const clients = await clientRes.json();
-        clientId = Array.isArray(clients) ? clients[0]?.id : null;
-      }
-      // Si l'upsert n'a pas retourné d'id (pas de contrainte unique configurée), on récupère le client par email
-      if (!clientId) {
-        const lookupRes = await fetch(SUPABASE_URL + '/rest/v1/de_clients?email=eq.' + encodeURIComponent(payload.email) + '&select=id&order=created_at.desc&limit=1', { headers });
-        if (lookupRes.ok) {
-          const lookup = await lookupRes.json();
-          clientId = Array.isArray(lookup) ? lookup[0]?.id : null;
-        }
-      }
 
-      // 2. Créer la demande
-      const demandeBody = {
-        client_id: clientId,
-        service: 'creation_entreprise',
-        urgence: payload.urgence,
-        description: JSON.stringify({
-          type_structure: payload.type_structure,
-          secteur: payload.secteur,
-          nom_commercial: payload.nom_commercial,
-          activite: payload.description,
-          adresse: payload.adresse + ', ' + payload.code_postal + ' ' + payload.ville,
-          type_domiciliation: payload.type_domiciliation,
-          nationalite: payload.nationalite,
-          commentaire: payload.commentaire
-        }),
-        statut: 'nouvelle'
-      };
+      if (error) throw error;
+      if (!data || data.success !== true) throw new Error((data && data.error) || 'Échec de la soumission');
 
-      const demandeRes = await fetch(SUPABASE_URL + '/rest/v1/de_demandes', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(demandeBody)
-      });
-      if (!demandeRes.ok) throw new Error('Insertion de la demande échouée (HTTP ' + demandeRes.status + ')');
-      const demandes = await demandeRes.json();
-      const ref = (Array.isArray(demandes) && demandes[0]?.reference) || ('DE-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000));
-
-      showSuccess(ref);
+      showSuccess(data.reference);
 
     } catch (err) {
       console.error('Erreur Supabase:', err);
-      // Afficher succès quand même avec référence locale (mode offline)
-      const ref = 'DE-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
-      showSuccess(ref);
+      document.getElementById('alert-error').classList.add('show');
+      document.getElementById('alert-msg').textContent = 'Une erreur est survenue lors de l\'envoi de votre demande. Veuillez réessayer ou nous contacter directement.';
+      document.getElementById('alert-error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      btn.disabled = false;
+      btn.innerHTML = 'Envoyer ma demande ✉️';
+      isSubmitting = false;
+      return;
     }
   }
 
