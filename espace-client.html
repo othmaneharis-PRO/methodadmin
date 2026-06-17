@@ -91,7 +91,13 @@
     <!-- MESSAGES -->
     <div class="page" id="page-messages">
       <h1 class="page-title">Messagerie</h1>
-      <div class="card">
+      <div class="card" id="messages-selector-card">
+        <label style="display:block;font-size:.82rem;font-weight:600;color:var(--dark);margin-bottom:.5rem">Choisissez un dossier</label>
+        <select id="dossier-select" onchange="selectDossierForMessages(this.value)" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:.6rem .9rem;font-size:.88rem;font-family:inherit;background:var(--bg)">
+          <option value="">Chargement des dossiers…</option>
+        </select>
+      </div>
+      <div class="card" id="messages-card" style="display:none">
         <div id="messages-list" style="max-height:400px;overflow-y:auto;margin-bottom:.5rem">
           <div class="loading"><div class="spinner"></div> Chargement…</div>
         </div>
@@ -115,11 +121,14 @@
 
 <script>
 const SUPABASE_URL = 'https://sahbhyccnkcqjzxkyzol.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwNjcxNzEsImV4cCI6MjA2NDY0MzE3MX0.Bla_IH6RjvV4OyUVqtb26Jlp8hqOFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDk2NTYsImV4cCI6MjA5MDE4NTY1Nn0.oFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let currentUser = null; let clientId = null;
+let currentUser = null;
+let myDossiers = [];
+let selectedDemandeId = null;
 
-const svcLabels = { creation_entreprise:'Création d\'entreprise', modification:'Modification', fermeture:'Fermeture / Radiation', kbis:'Extrait Kbis' };
+// Le service_type réel en base est creation/modification/fermeture/autre
+const svcLabels = { creation:'Création d\'entreprise', modification:'Modification', fermeture:'Fermeture / Radiation', autre:'Autre démarche' };
 
 // Échappe le HTML pour empêcher les injections XSS via les données utilisateur
 function escapeHtml(str) {
@@ -136,59 +145,159 @@ async function init() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) { window.location.href = 'login-client.html'; return; }
   currentUser = session.user;
-  const meta = currentUser.user_metadata;
-  document.getElementById('user-name').textContent = (meta?.prenom || '') + ' ' + (meta?.nom || '') || currentUser.email;
-  await loadClient();
+
+  // On récupère prénom/nom depuis le profil (table profiles), pas user_metadata (non fiable pour l'affichage mais ok ici, donnée non sensible)
+  const { data: profile } = await supabase.from('profiles').select('prenom, nom').eq('id', currentUser.id).maybeSingle();
+  document.getElementById('user-name').textContent = profile ? `${profile.prenom || ''} ${profile.nom || ''}`.trim() || currentUser.email : currentUser.email;
+
+  await ensureClientLinked();
   await loadDossiers();
 }
 
-async function loadClient() {
-  const { data } = await supabase.from('de_clients').select('id').eq('email', currentUser.email).maybeSingle();
-  if (data) clientId = data.id;
+// S'assure qu'une ligne "clients" existe et est liée à ce compte (user_id).
+// Si le client a soumis une demande via le formulaire public avant de créer un compte,
+// son enregistrement clients existe déjà avec le même email mais user_id NULL : on le lie.
+async function ensureClientLinked() {
+  const { data: existing } = await supabase.from('clients').select('id, user_id').eq('email', currentUser.email).maybeSingle();
+  if (existing && !existing.user_id) {
+    await supabase.from('clients').update({ user_id: currentUser.id }).eq('id', existing.id);
+  } else if (!existing) {
+    const { data: profile } = await supabase.from('profiles').select('prenom, nom, telephone').eq('id', currentUser.id).maybeSingle();
+    await supabase.from('clients').insert({
+      user_id: currentUser.id,
+      prenom: profile?.prenom || '',
+      nom: profile?.nom || '',
+      email: currentUser.email,
+      telephone: profile?.telephone || null
+    });
+  }
 }
 
 async function loadDossiers() {
   const container = document.getElementById('dossiers-list');
-  if (!clientId) { container.innerHTML = emptyState('📂', 'Aucun dossier trouvé', 'Votre premier dossier apparaîtra ici après soumission d\'une demande.'); return; }
-  const { data, error } = await supabase.from('de_demandes').select('*').eq('client_id', clientId).order('created_at', { ascending: false });
-  if (!data || data.length === 0) { container.innerHTML = emptyState('📂', 'Aucun dossier pour l\'instant', 'Commencez par soumettre une demande.') + '<div style="text-align:center;margin-top:1rem"><a href="creation-entreprise.html" class="btn-primary">🚀 Créer mon entreprise</a></div>'; return; }
-  container.innerHTML = data.map(d => `
+  const { data, error } = await supabase.from('vue_dossier_client').select('*').order('created_at', { ascending: false });
+  myDossiers = data || [];
+
+  if (error || myDossiers.length === 0) {
+    container.innerHTML = emptyState('📂', 'Aucun dossier pour l\'instant', 'Commencez par soumettre une demande.') + '<div style="text-align:center;margin-top:1rem"><a href="creation-entreprise.html" class="btn-primary">🚀 Créer mon entreprise</a></div>';
+    populateDossierSelect();
+    return;
+  }
+
+  container.innerHTML = myDossiers.map(d => `
     <div class="dossier-card">
       <div>
-        <div class="dossier-ref">${escapeHtml(d.reference) || d.id.slice(0,8).toUpperCase()}</div>
-        <div class="dossier-service">${escapeHtml(svcLabels[d.service] || d.service)}</div>
+        <div class="dossier-ref">${escapeHtml(d.reference)}</div>
+        <div class="dossier-service">${escapeHtml(svcLabels[d.service] || d.service)}${d.total_ttc ? ` · ${d.total_ttc} € TTC` : ''}</div>
       </div>
       <span class="badge badge-${d.statut}">${statutLabel(d.statut)}</span>
+      ${d.messages_non_lus > 0 ? `<span class="badge" style="background:#fee2e2;color:#991b1b">${d.messages_non_lus} message(s)</span>` : ''}
       <span class="dossier-date">${new Date(d.created_at).toLocaleDateString('fr-FR')}</span>
     </div>
   `).join('');
+
+  populateDossierSelect();
+}
+
+function populateDossierSelect() {
+  const sel = document.getElementById('dossier-select');
+  if (myDossiers.length === 0) {
+    sel.innerHTML = '<option value="">Aucun dossier disponible</option>';
+    document.getElementById('messages-card').style.display = 'none';
+    return;
+  }
+  sel.innerHTML = '<option value="">— Sélectionnez un dossier —</option>' +
+    myDossiers.map(d => `<option value="${d.id}">${escapeHtml(d.reference)} (${escapeHtml(svcLabels[d.service] || d.service)})</option>`).join('');
+}
+
+function selectDossierForMessages(demandeId) {
+  selectedDemandeId = demandeId || null;
+  const card = document.getElementById('messages-card');
+  if (!selectedDemandeId) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  loadMessages();
 }
 
 async function loadMessages() {
   const container = document.getElementById('messages-list');
-  if (!clientId) { container.innerHTML = '<p style="text-align:center;color:var(--gray);font-size:.85rem;padding:1rem">Aucun message.</p>'; return; }
-  const { data } = await supabase.from('de_messages').select('*').eq('client_id', clientId).order('created_at', { ascending: true });
+  if (!selectedDemandeId) { container.innerHTML = ''; return; }
+  container.innerHTML = '<div class="loading"><div class="spinner"></div> Chargement…</div>';
+  const { data } = await supabase.from('messages').select('*').eq('demande_id', selectedDemandeId).order('created_at', { ascending: true });
   if (!data || data.length === 0) { container.innerHTML = '<p style="text-align:center;color:var(--gray);font-size:.85rem;padding:1rem">Aucun message pour l\'instant.</p>'; return; }
   container.innerHTML = data.map(m => `
-    <div class="msg-bubble ${m.auteur === 'client' ? 'mine' : ''}">
-      <div class="msg-meta">${m.auteur === 'client' ? 'Vous' : 'MethodAdmin'} · ${new Date(m.created_at).toLocaleString('fr-FR')}</div>
+    <div class="msg-bubble ${m.auteur_id === currentUser.id ? 'mine' : ''}">
+      <div class="msg-meta">${m.auteur_id === currentUser.id ? 'Vous' : 'MethodAdmin'} · ${new Date(m.created_at).toLocaleString('fr-FR')}</div>
       <div class="msg-text">${escapeHtml(m.contenu)}</div>
     </div>
   `).join('');
   container.scrollTop = container.scrollHeight;
+  // Marquer les messages reçus comme lus
+  await supabase.from('messages').update({ lu: true }).eq('demande_id', selectedDemandeId).neq('auteur_id', currentUser.id);
 }
 
 async function loadDocuments() {
   const container = document.getElementById('docs-list');
-  container.innerHTML = emptyState('📄', 'Vos documents apparaîtront ici', 'L\'équipe vous demandera de fournir des pièces justificatives selon votre dossier.');
+  if (myDossiers.length === 0) { container.innerHTML = emptyState('📄', 'Vos documents apparaîtront ici', 'L\'équipe vous demandera de fournir des pièces justificatives selon votre dossier.'); return; }
+  container.innerHTML = '<div class="loading"><div class="spinner"></div> Chargement…</div>';
+
+  let html = '';
+  for (const d of myDossiers) {
+    const { data: requis } = await supabase.from('documents_requis').select('*').eq('demande_id', d.id);
+    const { data: deposes } = await supabase.from('documents_clients').select('*').eq('demande_id', d.id);
+    if (!requis || requis.length === 0) continue;
+
+    html += `<div class="card" style="margin-bottom:1rem">
+      <div style="font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:.75rem">${escapeHtml(d.reference)}</div>`;
+
+    for (const r of requis) {
+      const depose = (deposes || []).find(dc => dc.document_requis_id === r.id);
+      const statutTxt = depose ? (depose.statut === 'valide' ? '✅ Validé' : depose.statut === 'rejete' ? '❌ Rejeté — à renvoyer' : '⏳ En attente de validation') : '📋 À fournir';
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:.85rem;font-weight:600;color:var(--dark)">${escapeHtml(r.nom)}${r.obligatoire ? ' <span style="color:#ef4444">*</span>' : ''}</div>
+          <div style="font-size:.78rem;color:var(--gray)">${escapeHtml(r.description) || ''} — ${statutTxt}</div>
+        </div>
+        <div>
+          ${!depose || depose.statut === 'rejete' ? `<input type="file" id="file-${r.id}" accept="application/pdf,image/jpeg,image/png,image/webp" style="display:none" onchange="uploadDocument('${d.id}','${r.id}',this)"><button class="btn-primary" style="font-size:.78rem;padding:.4rem .8rem" onclick="document.getElementById('file-${r.id}').click()">Téléverser</button>` : ''}
+        </div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+  container.innerHTML = html || emptyState('📄', 'Aucun document requis pour le moment', 'L\'équipe vous indiquera les pièces à fournir une fois votre dossier étudié.');
+}
+
+async function uploadDocument(demandeId, documentRequisId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { alert('Le fichier dépasse la taille maximale autorisée (10 Mo).'); return; }
+  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) { alert('Type de fichier non autorisé. Formats acceptés : PDF, JPEG, PNG, WEBP.'); return; }
+
+  const path = `${demandeId}/${Date.now()}_${file.name}`;
+  const { error: uploadError } = await supabase.storage.from('documents-clients').upload(path, file);
+  if (uploadError) { alert('Erreur lors du téléversement : ' + uploadError.message); return; }
+
+  const { error: insertError } = await supabase.from('documents_clients').insert({
+    demande_id: demandeId,
+    document_requis_id: documentRequisId,
+    nom_fichier: file.name,
+    storage_path: path,
+    taille_bytes: file.size,
+    mime_type: file.type,
+    statut: 'en_attente'
+  });
+  if (insertError) { alert('Erreur lors de l\'enregistrement du document : ' + insertError.message); return; }
+
+  await loadDocuments();
 }
 
 async function sendMessage() {
   const input = document.getElementById('msg-input');
   const txt = input.value.trim();
   if (!txt) return;
-  if (!clientId) { alert('Impossible d\'envoyer un message : votre profil client n\'est pas encore lié. Contactez le support.'); return; }
-  const { error } = await supabase.from('de_messages').insert({ client_id: clientId, contenu: txt, auteur: 'client' });
+  if (!selectedDemandeId) { alert('Veuillez sélectionner un dossier.'); return; }
+  const { error } = await supabase.from('messages').insert({ demande_id: selectedDemandeId, auteur_id: currentUser.id, contenu: txt });
   if (error) { alert('Erreur lors de l\'envoi du message. Veuillez réessayer.'); return; }
   input.value = '';
   await loadMessages();
@@ -208,7 +317,6 @@ function showPage(name, el) {
   document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   el.classList.add('active');
-  if (name === 'messages') loadMessages();
   if (name === 'documents') loadDocuments();
 }
 
