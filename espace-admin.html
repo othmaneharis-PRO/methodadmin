@@ -138,10 +138,10 @@
         </select>
         <select class="filter-select" id="filter-service" onchange="filterDossiers()">
           <option value="">Tous les services</option>
-          <option value="creation_entreprise">Création d'entreprise</option>
+          <option value="creation">Création d'entreprise</option>
           <option value="modification">Modification</option>
           <option value="fermeture">Fermeture</option>
-          <option value="kbis">Kbis</option>
+          <option value="autre">Autre</option>
         </select>
       </div>
       <div class="table-wrap" id="all-table"><div class="loading"><div class="spinner"></div> Chargement…</div></div>
@@ -155,13 +155,8 @@
 
     <!-- DOCUMENTS -->
     <div class="page" id="page-documents">
-      <h1 class="page-title">Documents</h1>
-      <div class="table-wrap" id="docs-table">
-        <div style="padding:2rem;text-align:center;color:var(--gray)">
-          <p style="font-size:2rem;margin-bottom:.75rem">📄</p>
-          <p>Gestion des documents disponible après connexion des dossiers.</p>
-        </div>
-      </div>
+      <h1 class="page-title">Documents en attente de validation</h1>
+      <div class="table-wrap" id="docs-table"><div class="loading"><div class="spinner"></div> Chargement…</div></div>
     </div>
 
   </main>
@@ -178,13 +173,15 @@
 
 <script>
 const SUPABASE_URL = 'https://sahbhyccnkcqjzxkyzol.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwNjcxNzEsImV4cCI6MjA2NDY0MzE3MX0.Bla_IH6RjvV4OyUVqtb26Jlp8hqOFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDk2NTYsImV4cCI6MjA5MDE4NTY1Nn0.oFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let allDossiers = [];
-const svcLabels = { creation_entreprise:"Création d'entreprise", modification:"Modification", fermeture:"Fermeture", kbis:"Kbis" };
+// service_type réel en base : creation/modification/fermeture/autre
+const svcLabels = { creation:"Création d'entreprise", modification:"Modification", fermeture:"Fermeture", autre:"Autre" };
 const statutLabels = { nouvelle:"Nouvelle demande", en_etude:"En étude", devis_envoye:"Devis envoyé", devis_valide:"Devis accepté", docs_attente:"Documents requis", en_traitement:"En traitement", termine:"Terminé ✅", annulee:"Annulé" };
-const urgenceLabels = { normal:"Normal", urgent:"⚡ Urgent", tres_urgent:"🔴 Très urgent" };
+// urgence_type réel : "tres-urgent" avec un tiret
+const urgenceLabels = { normal:"Normal", urgent:"⚡ Urgent", "tres-urgent":"🔴 Très urgent" };
 
 // Échappe le HTML pour empêcher les injections XSS via les données utilisateur
 function escapeHtml(str) {
@@ -200,24 +197,27 @@ function escapeHtml(str) {
 async function init() {
   const { data:{ session } } = await supabase.auth.getSession();
   if (!session) { window.location.href = 'login-client.html'; return; }
-  // SÉCURITÉ : app_metadata est défini uniquement via la clé service_role (jamais par l'utilisateur)
-  const role = session.user.app_metadata?.role;
-  if (role !== 'admin') { window.location.href = 'login-client.html'; return; }
-  const meta = session.user.user_metadata;
-  document.getElementById('admin-name').textContent = (meta?.prenom||'') + ' ' + (meta?.nom||'');
+  // SÉCURITÉ : profiles.role est la source de vérité, protégée par RLS + trigger anti-escalade
+  const { data: profile } = await supabase.from('profiles').select('role, prenom, nom').eq('id', session.user.id).maybeSingle();
+  if (!profile || profile.role !== 'admin') { window.location.href = 'login-client.html'; return; }
+  document.getElementById('admin-name').textContent = `${profile.prenom||''} ${profile.nom||''}`.trim();
   await loadDashboard();
 }
 
 async function loadDashboard() {
-  const { data } = await supabase.from('de_demandes').select('*, de_clients(prenom, nom, email, telephone)').order('created_at', { ascending: false });
+  // vue_dossiers_admin est filtrée par RLS (admin uniquement) et fournit déjà le nom/email/téléphone du client
+  const { data } = await supabase.from('vue_dossiers_admin').select('*').order('created_at', { ascending: false });
   allDossiers = data || [];
-  // KPIs
-  const now = new Date(); const thisMonth = now.getMonth(); const thisYear = now.getFullYear();
-  document.getElementById('kpi-nouvelles').textContent = allDossiers.filter(d => d.statut === 'nouvelle').length;
-  document.getElementById('kpi-devis').textContent = allDossiers.filter(d => d.statut === 'en_etude').length;
-  document.getElementById('kpi-encours').textContent = allDossiers.filter(d => ['devis_valide','docs_attente','en_traitement'].includes(d.statut)).length;
-  document.getElementById('kpi-termines').textContent = allDossiers.filter(d => { const dd = new Date(d.created_at); return d.statut === 'termine' && dd.getMonth() === thisMonth && dd.getFullYear() === thisYear; }).length;
-  // Recent table
+
+  // KPIs via la fonction RPC dédiée (vérifie aussi le rôle admin côté serveur)
+  const { data: stats, error: statsError } = await supabase.rpc('get_admin_stats');
+  if (!statsError && stats) {
+    document.getElementById('kpi-nouvelles').textContent = stats.nouvelles_demandes ?? 0;
+    document.getElementById('kpi-devis').textContent = stats.dossiers_en_cours ?? 0;
+    document.getElementById('kpi-encours').textContent = stats.dossiers_en_cours ?? 0;
+    document.getElementById('kpi-termines').textContent = stats.dossiers_termines_mois ?? 0;
+  }
+
   renderDossierTable('recent-table', allDossiers.slice(0, 10));
 }
 
@@ -239,7 +239,7 @@ function filterDossiers() {
 }
 
 async function loadClients() {
-  const { data } = await supabase.from('de_clients').select('*').order('created_at', { ascending: false });
+  const { data } = await supabase.from('clients').select('*').order('created_at', { ascending: false });
   const container = document.getElementById('clients-table');
   if (!data || data.length === 0) { container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--gray)">Aucun client enregistré.</div>'; return; }
   container.innerHTML = `<table><thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Inscrit le</th></tr></thead><tbody>
@@ -255,15 +255,13 @@ function renderDossierTable(containerId, dossiers) {
   }
   container.innerHTML = `<table><thead><tr><th>Référence</th><th>Client</th><th>Service</th><th>Urgence</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead><tbody>
     ${dossiers.map(d => {
-      const client = d.de_clients || {};
-      const nomRaw = `${client.prenom||''} ${client.nom||''}`.trim() || d.client_id?.slice(0,8) || '—';
-      const nom = escapeHtml(nomRaw);
-      const urgClass = d.urgence === 'tres_urgent' ? 'badge-tres_urgent' : d.urgence === 'urgent' ? 'badge-urgent' : '';
+      const nom = escapeHtml(d.client_nom || '—');
+      const urgClass = d.urgence === 'tres-urgent' ? 'badge-tres_urgent' : d.urgence === 'urgent' ? 'badge-urgent' : '';
       return `<tr>
-        <td><strong>${escapeHtml(d.reference) || d.id.slice(0,8).toUpperCase()}</strong></td>
+        <td><strong>${escapeHtml(d.reference)}</strong></td>
         <td>${nom}</td>
         <td>${escapeHtml(svcLabels[d.service] || d.service)}</td>
-        <td>${urgClass ? `<span class="badge ${urgClass}">${urgenceLabels[d.urgence]}</span>` : urgenceLabels[d.urgence] || escapeHtml(d.urgence)}</td>
+        <td>${urgClass ? `<span class="badge ${urgClass}">${urgenceLabels[d.urgence]}</span>` : (urgenceLabels[d.urgence] || escapeHtml(d.urgence))}</td>
         <td><span class="badge badge-${d.statut}">${statutLabels[d.statut] || escapeHtml(d.statut)}</span></td>
         <td>${new Date(d.created_at).toLocaleDateString('fr-FR')}</td>
         <td>
@@ -279,30 +277,44 @@ function renderDossierTable(containerId, dossiers) {
 function openDossier(id) {
   const d = allDossiers.find(x => x.id === id);
   if (!d) return;
-  const client = d.de_clients || {};
-  let desc = {};
-  try { desc = JSON.parse(d.description || '{}'); } catch(e) { desc = { activite: d.description }; }
-  document.getElementById('modal-title').textContent = d.reference || id.slice(0,8).toUpperCase();
+  document.getElementById('modal-title').textContent = d.reference;
   document.getElementById('modal-content').innerHTML = `
     <div style="margin-bottom:1rem">
-      <div class="detail-row"><span class="detail-label">Client</span><span class="detail-value">${escapeHtml(client.prenom)} ${escapeHtml(client.nom)}</span></div>
-      <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${escapeHtml(client.email) || '—'}</span></div>
-      <div class="detail-row"><span class="detail-label">Téléphone</span><span class="detail-value">${escapeHtml(client.telephone) || '—'}</span></div>
+      <div class="detail-row"><span class="detail-label">Client</span><span class="detail-value">${escapeHtml(d.client_nom)}</span></div>
+      <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${escapeHtml(d.client_email) || '—'}</span></div>
+      <div class="detail-row"><span class="detail-label">Téléphone</span><span class="detail-value">${escapeHtml(d.client_telephone) || '—'}</span></div>
       <div class="detail-row"><span class="detail-label">Service</span><span class="detail-value">${escapeHtml(svcLabels[d.service]||d.service)}</span></div>
       <div class="detail-row"><span class="detail-label">Urgence</span><span class="detail-value">${urgenceLabels[d.urgence]||escapeHtml(d.urgence)}</span></div>
       <div class="detail-row"><span class="detail-label">Statut</span><span class="detail-value"><span class="badge badge-${d.statut}">${statutLabels[d.statut]||escapeHtml(d.statut)}</span></span></div>
       <div class="detail-row"><span class="detail-label">Date</span><span class="detail-value">${new Date(d.created_at).toLocaleString('fr-FR')}</span></div>
-      ${desc.type_structure ? `<div class="detail-row"><span class="detail-label">Structure</span><span class="detail-value">${escapeHtml(desc.type_structure)}</span></div>` : ''}
-      ${desc.secteur ? `<div class="detail-row"><span class="detail-label">Secteur</span><span class="detail-value">${escapeHtml(desc.secteur)}</span></div>` : ''}
-      ${desc.adresse ? `<div class="detail-row"><span class="detail-label">Adresse siège</span><span class="detail-value">${escapeHtml(desc.adresse)}</span></div>` : ''}
-      ${desc.activite ? `<div class="detail-row"><span class="detail-label">Activité</span><span class="detail-value">${escapeHtml(desc.activite)}</span></div>` : ''}
-      ${desc.commentaire ? `<div class="detail-row"><span class="detail-label">Commentaire</span><span class="detail-value">${escapeHtml(desc.commentaire)}</span></div>` : ''}
+      <div class="detail-row"><span class="detail-label">Description</span><span class="detail-value" style="white-space:pre-wrap;text-align:left;max-width:60%">${escapeHtml(d.description)}</span></div>
+      ${d.note_admin ? `<div class="detail-row"><span class="detail-label">Note interne</span><span class="detail-value">${escapeHtml(d.note_admin)}</span></div>` : ''}
+      ${d.devis_total ? `<div class="detail-row"><span class="detail-label">Devis</span><span class="detail-value">${d.devis_total} € TTC (${d.devis_statut})</span></div>` : ''}
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
       <button class="btn-primary" onclick="openStatutModal('${d.id}','${d.statut}')">Changer le statut</button>
       <button class="btn-primary" style="background:#7c3aed" onclick="openDevisModal('${d.id}')">Créer un devis</button>
+      <button class="btn-primary" style="background:#0f172a" onclick="openNoteModal('${d.id}')">Note interne</button>
+      <button class="btn-primary" style="background:#0891b2" onclick="openAddDocRequisModal('${d.id}')">+ Document requis</button>
     </div>`;
   document.getElementById('modal').classList.add('open');
+}
+
+function openNoteModal(id) {
+  const d = allDossiers.find(x => x.id === id);
+  document.getElementById('modal-title').textContent = 'Note interne';
+  document.getElementById('modal-content').innerHTML = `
+    <div class="field"><label>Note (visible uniquement par l'équipe)</label><textarea id="note-content" rows="4">${escapeHtml(d?.note_admin || '')}</textarea></div>
+    <button class="btn-primary" onclick="saveNote('${id}')">Enregistrer</button>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+async function saveNote(id) {
+  const note = document.getElementById('note-content').value;
+  const { error } = await supabase.from('demandes').update({ note_admin: note }).eq('id', id);
+  if (error) { alert('Erreur lors de l\'enregistrement : ' + error.message); return; }
+  closeModal();
+  await loadDashboard();
 }
 
 function openStatutModal(id, currentStatut) {
@@ -321,7 +333,8 @@ function openStatutModal(id, currentStatut) {
 
 async function updateStatut(id) {
   const newStatut = document.getElementById('new-statut').value;
-  await supabase.from('de_demandes').update({ statut: newStatut }).eq('id', id);
+  const { error } = await supabase.from('demandes').update({ statut: newStatut }).eq('id', id);
+  if (error) { alert('Erreur lors de la mise à jour du statut : ' + error.message); return; }
   closeModal();
   await loadDashboard();
   alert('Statut mis à jour avec succès.');
@@ -334,24 +347,24 @@ function openDevisModal(id) {
       <div class="field"><label>Honoraires HT (€)</label><input type="number" id="dv-honoraires" placeholder="149" oninput="calcDevis()"></div>
       <div class="field"><label>Frais de greffe (€)</label><input type="number" id="dv-greffe" placeholder="66.88" oninput="calcDevis()"></div>
       <div class="field"><label>Annonce légale (€)</label><input type="number" id="dv-annonce" placeholder="138" oninput="calcDevis()"></div>
-      <div class="field"><label>TVA (%)</label><input type="number" id="dv-tva" value="20" oninput="calcDevis()"></div>
+      <div class="field"><label>Délai estimé</label><input type="text" id="dv-delai" placeholder="5 à 7 jours ouvrés"></div>
     </div>
     <div class="devis-total">
-      <span class="devis-total-label">Total TTC</span>
+      <span class="devis-total-label">Total TTC (TVA 20% incluse)</span>
       <span class="devis-total-value" id="dv-total">0,00 €</span>
     </div>
-    <div class="field" style="margin-top:1rem"><label>Notes / commentaires</label><textarea id="dv-notes" rows="3" placeholder="Détails du devis, conditions particulières…"></textarea></div>
+    <div class="field" style="margin-top:1rem"><label>Message au client</label><textarea id="dv-notes" rows="3" placeholder="Détails du devis, conditions particulières…"></textarea></div>
     <button class="btn-primary" style="margin-top:.5rem" onclick="submitDevis('${id}')">Envoyer le devis</button>`;
   document.getElementById('modal').classList.add('open');
 }
 
 function calcDevis() {
+  // Le total_ttc réel est calculé automatiquement en base : (honoraires+greffe+annonce) * 1.20
+  // Ce calcul JS n'est qu'un aperçu visuel pour l'admin avant envoi.
   const h = parseFloat(document.getElementById('dv-honoraires').value) || 0;
   const g = parseFloat(document.getElementById('dv-greffe').value) || 0;
   const a = parseFloat(document.getElementById('dv-annonce').value) || 0;
-  const tva = (parseFloat(document.getElementById('dv-tva').value) || 20) / 100;
-  const ht = h + g + a;
-  const ttc = ht + (h * tva); // TVA sur honoraires seulement
+  const ttc = (h + g + a) * 1.20;
   document.getElementById('dv-total').textContent = ttc.toFixed(2).replace('.',',') + ' €';
 }
 
@@ -359,14 +372,91 @@ async function submitDevis(demandeId) {
   const honoraires = parseFloat(document.getElementById('dv-honoraires').value) || 0;
   const fraisGreffe = parseFloat(document.getElementById('dv-greffe').value) || 0;
   const annonceLegale = parseFloat(document.getElementById('dv-annonce').value) || 0;
-  const tva = parseFloat(document.getElementById('dv-tva').value) || 20;
-  const notes = document.getElementById('dv-notes').value;
+  const delai = document.getElementById('dv-delai').value || null;
+  const messageClient = document.getElementById('dv-notes').value || null;
   if (!honoraires) { alert('Veuillez saisir le montant des honoraires.'); return; }
-  await supabase.from('de_devis').insert({ demande_id: demandeId, honoraires_ht: honoraires, frais_greffe: fraisGreffe, annonce_legale: annonceLegale, tva_pct: tva, notes, statut: 'envoye' });
-  await supabase.from('de_demandes').update({ statut: 'devis_envoye' }).eq('id', demandeId);
+
+  // total_ttc est une colonne générée automatiquement par la base, on ne l'envoie pas
+  const { error: devisError } = await supabase.from('devis').insert({
+    demande_id: demandeId,
+    honoraires_ht: honoraires,
+    frais_greffe: fraisGreffe,
+    annonce_legale: annonceLegale,
+    delai_estime: delai,
+    message_client: messageClient,
+    statut: 'envoye'
+  });
+  if (devisError) { alert('Erreur lors de la création du devis : ' + devisError.message); return; }
+
+  const { error: statutError } = await supabase.from('demandes').update({ statut: 'devis_envoye' }).eq('id', demandeId);
+  if (statutError) { alert('Devis créé, mais erreur lors de la mise à jour du statut : ' + statutError.message); return; }
+
   closeModal();
   await loadDashboard();
   alert('Devis envoyé et statut mis à jour.');
+}
+
+async function loadDocumentsAdmin() {
+  const container = document.getElementById('docs-table');
+  const { data, error } = await supabase
+    .from('documents_clients')
+    .select('id, nom_fichier, storage_path, statut, uploaded_at, demande_id, demandes(reference), documents_requis(nom)')
+    .eq('statut', 'en_attente')
+    .order('uploaded_at', { ascending: true });
+
+  if (error || !data || data.length === 0) {
+    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--gray)">Aucun document en attente de validation.</div>';
+    return;
+  }
+
+  container.innerHTML = `<table><thead><tr><th>Dossier</th><th>Pièce demandée</th><th>Fichier</th><th>Déposé le</th><th>Actions</th></tr></thead><tbody>
+    ${data.map(doc => `<tr>
+      <td><strong>${escapeHtml(doc.demandes?.reference || '—')}</strong></td>
+      <td>${escapeHtml(doc.documents_requis?.nom || '—')}</td>
+      <td>${escapeHtml(doc.nom_fichier)}</td>
+      <td>${new Date(doc.uploaded_at).toLocaleDateString('fr-FR')}</td>
+      <td>
+        <button class="action-btn" onclick="previewDocument('${doc.storage_path}')">Voir</button>
+        <button class="action-btn" style="color:#15803d;border-color:#bbf7d0" onclick="reviewDocument('${doc.id}','valide')">Valider</button>
+        <button class="action-btn" style="color:#991b1b;border-color:#fecaca" onclick="reviewDocument('${doc.id}','rejete')">Rejeter</button>
+      </td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+async function previewDocument(storagePath) {
+  const { data, error } = await supabase.storage.from('documents-clients').createSignedUrl(storagePath, 300);
+  if (error || !data) { alert('Impossible de générer le lien de visualisation.'); return; }
+  window.open(data.signedUrl, '_blank');
+}
+
+async function reviewDocument(docId, statut) {
+  const { error } = await supabase.from('documents_clients').update({ statut, valide_le: new Date().toISOString() }).eq('id', docId);
+  if (error) { alert('Erreur : ' + error.message); return; }
+  await loadDocumentsAdmin();
+}
+
+function openAddDocRequisModal(demandeId) {
+  document.getElementById('modal-title').textContent = 'Ajouter un document requis';
+  document.getElementById('modal-content').innerHTML = `
+    <div class="field"><label>Nom du document</label><input type="text" id="doc-nom" placeholder="Pièce d'identité, RIB, justificatif de domicile…"></div>
+    <div class="field"><label>Description (optionnel)</label><textarea id="doc-desc" rows="2" placeholder="Précisions sur le document attendu"></textarea></div>
+    <div class="field" style="display:flex;align-items:center;gap:.5rem"><input type="checkbox" id="doc-obligatoire" checked style="width:auto"><label style="margin:0">Document obligatoire</label></div>
+    <button class="btn-primary" onclick="addDocRequis('${demandeId}')">Ajouter</button>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+async function addDocRequis(demandeId) {
+  const nom = document.getElementById('doc-nom').value.trim();
+  if (!nom) { alert('Veuillez indiquer le nom du document.'); return; }
+  const description = document.getElementById('doc-desc').value.trim() || null;
+  const obligatoire = document.getElementById('doc-obligatoire').checked;
+  const { error } = await supabase.from('documents_requis').insert({ demande_id: demandeId, nom, description, obligatoire });
+  if (error) { alert('Erreur lors de l\'ajout : ' + error.message); return; }
+  await supabase.from('demandes').update({ statut: 'docs_attente' }).eq('id', demandeId);
+  closeModal();
+  await loadDashboard();
+  alert('Document requis ajouté avec succès.');
 }
 
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
@@ -380,6 +470,7 @@ function showPage(name, el) {
   if (name === 'demandes') loadNewDemandes();
   if (name === 'dossiers') loadAllDossiers();
   if (name === 'clients') loadClients();
+  if (name === 'documents') loadDocumentsAdmin();
 }
 
 async function logout() { await supabase.auth.signOut(); window.location.href = 'login-client.html'; }
