@@ -123,12 +123,12 @@
 const SUPABASE_URL = 'https://sahbhyccnkcqjzxkyzol.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDk2NTYsImV4cCI6MjA5MDE4NTY1Nn0.oFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
 
-let supabase = null;
+let db = null;
 try {
   if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
     throw new Error('SDK Supabase non chargé');
   }
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 } catch (e) {
   console.error('Erreur de chargement du SDK Supabase:', e);
   document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#475569;text-align:center;padding:2rem"><div><p style="font-size:1.1rem;font-weight:600;margin-bottom:.5rem">Erreur de chargement</p><p>Impossible de charger l\'application. Veuillez rafraîchir la page.</p></div></div>';
@@ -153,12 +153,12 @@ function escapeHtml(str) {
 }
 
 async function init() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await db.auth.getSession();
   if (!session) { window.location.href = 'login-client.html'; return; }
   currentUser = session.user;
 
   // On récupère prénom/nom depuis le profil (table profiles), pas user_metadata (non fiable pour l'affichage mais ok ici, donnée non sensible)
-  const { data: profile } = await supabase.from('profiles').select('prenom, nom').eq('id', currentUser.id).maybeSingle();
+  const { data: profile } = await db.from('profiles').select('prenom, nom').eq('id', currentUser.id).maybeSingle();
   document.getElementById('user-name').textContent = profile ? `${profile.prenom || ''} ${profile.nom || ''}`.trim() || currentUser.email : currentUser.email;
 
   await ensureClientLinked();
@@ -169,12 +169,12 @@ async function init() {
 // Si le client a soumis une demande via le formulaire public avant de créer un compte,
 // son enregistrement clients existe déjà avec le même email mais user_id NULL : on le lie.
 async function ensureClientLinked() {
-  const { data: existing } = await supabase.from('clients').select('id, user_id').eq('email', currentUser.email).maybeSingle();
+  const { data: existing } = await db.from('clients').select('id, user_id').eq('email', currentUser.email).maybeSingle();
   if (existing && !existing.user_id) {
-    await supabase.from('clients').update({ user_id: currentUser.id }).eq('id', existing.id);
+    await db.from('clients').update({ user_id: currentUser.id }).eq('id', existing.id);
   } else if (!existing) {
-    const { data: profile } = await supabase.from('profiles').select('prenom, nom, telephone').eq('id', currentUser.id).maybeSingle();
-    await supabase.from('clients').insert({
+    const { data: profile } = await db.from('profiles').select('prenom, nom, telephone').eq('id', currentUser.id).maybeSingle();
+    await db.from('clients').insert({
       user_id: currentUser.id,
       prenom: profile?.prenom || '',
       nom: profile?.nom || '',
@@ -186,7 +186,7 @@ async function ensureClientLinked() {
 
 async function loadDossiers() {
   const container = document.getElementById('dossiers-list');
-  const { data, error } = await supabase.from('vue_dossier_client').select('*').order('created_at', { ascending: false });
+  const { data, error } = await db.from('vue_dossier_client').select('*').order('created_at', { ascending: false });
   myDossiers = data || [];
 
   if (error || myDossiers.length === 0) {
@@ -233,7 +233,7 @@ async function loadMessages() {
   const container = document.getElementById('messages-list');
   if (!selectedDemandeId) { container.innerHTML = ''; return; }
   container.innerHTML = '<div class="loading"><div class="spinner"></div> Chargement…</div>';
-  const { data } = await supabase.from('messages').select('*').eq('demande_id', selectedDemandeId).order('created_at', { ascending: true });
+  const { data } = await db.from('messages').select('*').eq('demande_id', selectedDemandeId).order('created_at', { ascending: true });
   if (!data || data.length === 0) { container.innerHTML = '<p style="text-align:center;color:var(--gray);font-size:.85rem;padding:1rem">Aucun message pour l\'instant.</p>'; return; }
   container.innerHTML = data.map(m => `
     <div class="msg-bubble ${m.auteur_id === currentUser.id ? 'mine' : ''}">
@@ -243,7 +243,7 @@ async function loadMessages() {
   `).join('');
   container.scrollTop = container.scrollHeight;
   // Marquer les messages reçus comme lus
-  await supabase.from('messages').update({ lu: true }).eq('demande_id', selectedDemandeId).neq('auteur_id', currentUser.id);
+  await db.from('messages').update({ lu: true }).eq('demande_id', selectedDemandeId).neq('auteur_id', currentUser.id);
 }
 
 async function loadDocuments() {
@@ -253,8 +253,8 @@ async function loadDocuments() {
 
   let html = '';
   for (const d of myDossiers) {
-    const { data: requis } = await supabase.from('documents_requis').select('*').eq('demande_id', d.id);
-    const { data: deposes } = await supabase.from('documents_clients').select('*').eq('demande_id', d.id);
+    const { data: requis } = await db.from('documents_requis').select('*').eq('demande_id', d.id);
+    const { data: deposes } = await db.from('documents_clients').select('*').eq('demande_id', d.id);
     if (!requis || requis.length === 0) continue;
 
     html += `<div class="card" style="margin-bottom:1rem">
@@ -286,10 +286,10 @@ async function uploadDocument(demandeId, documentRequisId, input) {
   if (!allowedTypes.includes(file.type)) { alert('Type de fichier non autorisé. Formats acceptés : PDF, JPEG, PNG, WEBP.'); return; }
 
   const path = `${demandeId}/${Date.now()}_${file.name}`;
-  const { error: uploadError } = await supabase.storage.from('documents-clients').upload(path, file);
+  const { error: uploadError } = await db.storage.from('documents-clients').upload(path, file);
   if (uploadError) { alert('Erreur lors du téléversement : ' + uploadError.message); return; }
 
-  const { error: insertError } = await supabase.from('documents_clients').insert({
+  const { error: insertError } = await db.from('documents_clients').insert({
     demande_id: demandeId,
     document_requis_id: documentRequisId,
     nom_fichier: file.name,
@@ -308,7 +308,7 @@ async function sendMessage() {
   const txt = input.value.trim();
   if (!txt) return;
   if (!selectedDemandeId) { alert('Veuillez sélectionner un dossier.'); return; }
-  const { error } = await supabase.from('messages').insert({ demande_id: selectedDemandeId, auteur_id: currentUser.id, contenu: txt });
+  const { error } = await db.from('messages').insert({ demande_id: selectedDemandeId, auteur_id: currentUser.id, contenu: txt });
   if (error) { alert('Erreur lors de l\'envoi du message. Veuillez réessayer.'); return; }
   input.value = '';
   await loadMessages();
@@ -332,11 +332,11 @@ function showPage(name, el) {
 }
 
 async function logout() {
-  await supabase.auth.signOut();
+  await db.auth.signOut();
   window.location.href = 'login-client.html';
 }
 
-if (supabase) init();
+if (db) init();
 </script>
 </body>
 </html>
