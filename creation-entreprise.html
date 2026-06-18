@@ -892,13 +892,13 @@
   // Vérification défensive : si le SDK Supabase n'a pas pu se charger (fichier introuvable,
   // problème réseau...), on ne plante pas tout le script — on affiche un message clair et
   // on bloque uniquement la soumission, pas la navigation entre étapes.
-  let supabase = null;
+  let db = null;
   let sdkLoadError = false;
   try {
     if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
       throw new Error('SDK Supabase non chargé');
     }
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   } catch (e) {
     console.error('Erreur de chargement du SDK Supabase:', e);
     sdkLoadError = true;
@@ -1079,7 +1079,7 @@
     }
 
     // ─── SUBMIT ───
-    if (sdkLoadError || !supabase) {
+    if (sdkLoadError || !db) {
       document.getElementById('alert-error').classList.add('show');
       document.getElementById('alert-msg').textContent = 'Erreur technique : impossible de charger le système d\'envoi. Veuillez rafraîchir la page ou nous contacter directement.';
       document.getElementById('alert-error').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1106,7 +1106,7 @@
     const urgenceDb = urgence === 'tres_urgent' ? 'tres-urgent' : urgence;
 
     try {
-      const { data, error } = await supabase.rpc('soumettre_demande', {
+      const { data, error } = await db.rpc('soumettre_demande', {
         p_prenom: document.getElementById('prenom').value.trim(),
         p_nom: document.getElementById('nom').value.trim(),
         p_email: document.getElementById('email').value.trim(),
