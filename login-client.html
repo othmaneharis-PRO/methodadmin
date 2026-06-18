@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Connexion — MethodAdmin</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root { --blue:#1a56db;--blue-hover:#1240b0;--blue-light:#e8f0fe;--dark:#0f172a;--gray:#475569;--bg:#f7f8fc;--white:#fff;--border:#e2e8f0;--radius:10px; }
@@ -105,7 +105,18 @@
 <script>
 const SUPABASE_URL = 'https://sahbhyccnkcqjzxkyzol.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDk2NTYsImV4cCI6MjA5MDE4NTY1Nn0.oFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let supabase = null;
+let sdkLoadError = false;
+try {
+  if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
+    throw new Error('SDK Supabase non chargé');
+  }
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (e) {
+  console.error('Erreur de chargement du SDK Supabase:', e);
+  sdkLoadError = true;
+}
 
 let currentSpace = 'client';
 let currentMode = 'login';
@@ -135,6 +146,7 @@ function switchMode(mode) {
 }
 
 async function doLogin() {
+  if (sdkLoadError || !supabase) return showError('Erreur technique : impossible de charger le système de connexion. Veuillez rafraîchir la page.');
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   if (!email || !password) return showError('Veuillez remplir tous les champs.');
@@ -155,6 +167,7 @@ async function doLogin() {
 }
 
 async function doRegister() {
+  if (sdkLoadError || !supabase) return showError('Erreur technique : impossible de charger le système d\'inscription. Veuillez rafraîchir la page.');
   const prenom = document.getElementById('reg-prenom').value.trim();
   const nom = document.getElementById('reg-nom').value.trim();
   const email = document.getElementById('reg-email').value.trim();
@@ -174,6 +187,7 @@ async function doRegister() {
 }
 
 async function doReset() {
+  if (sdkLoadError || !supabase) return showError('Erreur technique : impossible de charger le système. Veuillez rafraîchir la page.');
   const email = document.getElementById('reset-email').value.trim();
   if (!email) return showError('Veuillez saisir votre adresse email.');
   const btn = document.getElementById('btn-reset');
