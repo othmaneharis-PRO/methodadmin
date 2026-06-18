@@ -6,7 +6,7 @@
   <title>Créer mon entreprise — MethodAdmin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -888,7 +888,21 @@
   // ─── CONFIG SUPABASE ───
   const SUPABASE_URL = 'https://sahbhyccnkcqjzxkyzol.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDk2NTYsImV4cCI6MjA5MDE4NTY1Nn0.oFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Vérification défensive : si le SDK Supabase n'a pas pu se charger (fichier introuvable,
+  // problème réseau...), on ne plante pas tout le script — on affiche un message clair et
+  // on bloque uniquement la soumission, pas la navigation entre étapes.
+  let supabase = null;
+  let sdkLoadError = false;
+  try {
+    if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
+      throw new Error('SDK Supabase non chargé');
+    }
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } catch (e) {
+    console.error('Erreur de chargement du SDK Supabase:', e);
+    sdkLoadError = true;
+  }
 
   // ─── STATE ───
   let current = 1;
@@ -1065,6 +1079,12 @@
     }
 
     // ─── SUBMIT ───
+    if (sdkLoadError || !supabase) {
+      document.getElementById('alert-error').classList.add('show');
+      document.getElementById('alert-msg').textContent = 'Erreur technique : impossible de charger le système d\'envoi. Veuillez rafraîchir la page ou nous contacter directement.';
+      document.getElementById('alert-error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     isSubmitting = true;
     const btn = document.getElementById('btn-next');
     btn.disabled = true;
