@@ -412,15 +412,52 @@
       transition: .15s;
     }
     .checkbox-wrap:hover { border-color: var(--blue); }
+    .checkbox-wrap.checked { border-color: var(--blue); background: var(--blue-light); }
+
+    /* Case à cocher personnalisée : on masque la case native (invisible mais toujours
+       fonctionnelle et accessible) et on dessine notre propre carré + coche, pour un
+       rendu identique et bien visible sur tous les navigateurs. */
     .checkbox-wrap input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      min-width: 18px;
-      border: 1.5px solid var(--border);
-      border-radius: 4px;
-      accent-color: var(--blue);
+      position: absolute;
+      opacity: 0;
+      width: 22px;
+      height: 22px;
+      margin: 0;
       cursor: pointer;
-      margin-top: 2px;
+    }
+    .checkbox-visual {
+      position: relative;
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      border: 2px solid var(--border);
+      border-radius: 5px;
+      background: var(--white);
+      transition: .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .checkbox-wrap input[type="checkbox"]:checked ~ .checkbox-visual {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+    .checkbox-visual::after {
+      content: '';
+      width: 6px;
+      height: 11px;
+      border: solid var(--white);
+      border-width: 0 2.5px 2.5px 0;
+      transform: rotate(45deg) scale(0);
+      transition: transform .15s;
+      margin-top: -2px;
+    }
+    .checkbox-wrap input[type="checkbox"]:checked ~ .checkbox-visual::after {
+      transform: rotate(45deg) scale(1);
+    }
+    .checkbox-wrap input[type="checkbox"]:focus-visible ~ .checkbox-visual {
+      box-shadow: 0 0 0 3px var(--blue-light);
     }
     .checkbox-wrap span { font-size: .85rem; color: var(--gray); line-height: 1.5; }
     .checkbox-wrap a { color: var(--blue); text-decoration: none; }
@@ -785,8 +822,9 @@
 
       <div style="margin-top:1rem">
         <div class="section-title">Conditions d'utilisation</div>
-        <label class="checkbox-wrap">
+        <label class="checkbox-wrap" id="cgu-wrap">
           <input type="checkbox" id="cgu">
+          <span class="checkbox-visual"></span>
           <span>J'accepte les <a href="cgu.html" target="_blank">conditions générales d'utilisation</a> et la <a href="confidentialite.html" target="_blank">politique de confidentialité</a>. Je certifie que les informations fournies sont exactes.</span>
         </label>
       </div>
@@ -1153,6 +1191,10 @@
     });
     document.getElementById('ville').addEventListener('input', (e) => {
       e.target.value = e.target.value.replace(/\b\w/g, c => c.toUpperCase());
+    });
+    // Synchronise l'apparence de la case CGU (fond bleu) avec son état réel
+    document.getElementById('cgu').addEventListener('change', (e) => {
+      document.getElementById('cgu-wrap').classList.toggle('checked', e.target.checked);
     });
   });
 </script>
