@@ -175,12 +175,12 @@
 const SUPABASE_URL = 'https://sahbhyccnkcqjzxkyzol.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDk2NTYsImV4cCI6MjA5MDE4NTY1Nn0.oFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
 
-let supabase = null;
+let db = null;
 try {
   if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
     throw new Error('SDK Supabase non chargé');
   }
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 } catch (e) {
   console.error('Erreur de chargement du SDK Supabase:', e);
   document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#475569;text-align:center;padding:2rem"><div><p style="font-size:1.1rem;font-weight:600;margin-bottom:.5rem">Erreur de chargement</p><p>Impossible de charger l\'application. Veuillez rafraîchir la page.</p></div></div>';
@@ -205,10 +205,10 @@ function escapeHtml(str) {
 }
 
 async function init() {
-  const { data:{ session } } = await supabase.auth.getSession();
+  const { data:{ session } } = await db.auth.getSession();
   if (!session) { window.location.href = 'login-client.html'; return; }
   // SÉCURITÉ : profiles.role est la source de vérité, protégée par RLS + trigger anti-escalade
-  const { data: profile } = await supabase.from('profiles').select('role, prenom, nom').eq('id', session.user.id).maybeSingle();
+  const { data: profile } = await db.from('profiles').select('role, prenom, nom').eq('id', session.user.id).maybeSingle();
   if (!profile || profile.role !== 'admin') { window.location.href = 'login-client.html'; return; }
   document.getElementById('admin-name').textContent = `${profile.prenom||''} ${profile.nom||''}`.trim();
   await loadDashboard();
@@ -216,11 +216,11 @@ async function init() {
 
 async function loadDashboard() {
   // vue_dossiers_admin est filtrée par RLS (admin uniquement) et fournit déjà le nom/email/téléphone du client
-  const { data } = await supabase.from('vue_dossiers_admin').select('*').order('created_at', { ascending: false });
+  const { data } = await db.from('vue_dossiers_admin').select('*').order('created_at', { ascending: false });
   allDossiers = data || [];
 
   // KPIs via la fonction RPC dédiée (vérifie aussi le rôle admin côté serveur)
-  const { data: stats, error: statsError } = await supabase.rpc('get_admin_stats');
+  const { data: stats, error: statsError } = await db.rpc('get_admin_stats');
   if (!statsError && stats) {
     document.getElementById('kpi-nouvelles').textContent = stats.nouvelles_demandes ?? 0;
     document.getElementById('kpi-devis').textContent = stats.dossiers_en_cours ?? 0;
@@ -249,7 +249,7 @@ function filterDossiers() {
 }
 
 async function loadClients() {
-  const { data } = await supabase.from('clients').select('*').order('created_at', { ascending: false });
+  const { data } = await db.from('clients').select('*').order('created_at', { ascending: false });
   const container = document.getElementById('clients-table');
   if (!data || data.length === 0) { container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--gray)">Aucun client enregistré.</div>'; return; }
   container.innerHTML = `<table><thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Inscrit le</th></tr></thead><tbody>
@@ -321,7 +321,7 @@ function openNoteModal(id) {
 
 async function saveNote(id) {
   const note = document.getElementById('note-content').value;
-  const { error } = await supabase.from('demandes').update({ note_admin: note }).eq('id', id);
+  const { error } = await db.from('demandes').update({ note_admin: note }).eq('id', id);
   if (error) { alert('Erreur lors de l\'enregistrement : ' + error.message); return; }
   closeModal();
   await loadDashboard();
@@ -343,7 +343,7 @@ function openStatutModal(id, currentStatut) {
 
 async function updateStatut(id) {
   const newStatut = document.getElementById('new-statut').value;
-  const { error } = await supabase.from('demandes').update({ statut: newStatut }).eq('id', id);
+  const { error } = await db.from('demandes').update({ statut: newStatut }).eq('id', id);
   if (error) { alert('Erreur lors de la mise à jour du statut : ' + error.message); return; }
   closeModal();
   await loadDashboard();
@@ -387,7 +387,7 @@ async function submitDevis(demandeId) {
   if (!honoraires) { alert('Veuillez saisir le montant des honoraires.'); return; }
 
   // total_ttc est une colonne générée automatiquement par la base, on ne l'envoie pas
-  const { error: devisError } = await supabase.from('devis').insert({
+  const { error: devisError } = await db.from('devis').insert({
     demande_id: demandeId,
     honoraires_ht: honoraires,
     frais_greffe: fraisGreffe,
@@ -398,7 +398,7 @@ async function submitDevis(demandeId) {
   });
   if (devisError) { alert('Erreur lors de la création du devis : ' + devisError.message); return; }
 
-  const { error: statutError } = await supabase.from('demandes').update({ statut: 'devis_envoye' }).eq('id', demandeId);
+  const { error: statutError } = await db.from('demandes').update({ statut: 'devis_envoye' }).eq('id', demandeId);
   if (statutError) { alert('Devis créé, mais erreur lors de la mise à jour du statut : ' + statutError.message); return; }
 
   closeModal();
@@ -435,13 +435,13 @@ async function loadDocumentsAdmin() {
 }
 
 async function previewDocument(storagePath) {
-  const { data, error } = await supabase.storage.from('documents-clients').createSignedUrl(storagePath, 300);
+  const { data, error } = await db.storage.from('documents-clients').createSignedUrl(storagePath, 300);
   if (error || !data) { alert('Impossible de générer le lien de visualisation.'); return; }
   window.open(data.signedUrl, '_blank');
 }
 
 async function reviewDocument(docId, statut) {
-  const { error } = await supabase.from('documents_clients').update({ statut, valide_le: new Date().toISOString() }).eq('id', docId);
+  const { error } = await db.from('documents_clients').update({ statut, valide_le: new Date().toISOString() }).eq('id', docId);
   if (error) { alert('Erreur : ' + error.message); return; }
   await loadDocumentsAdmin();
 }
@@ -461,9 +461,9 @@ async function addDocRequis(demandeId) {
   if (!nom) { alert('Veuillez indiquer le nom du document.'); return; }
   const description = document.getElementById('doc-desc').value.trim() || null;
   const obligatoire = document.getElementById('doc-obligatoire').checked;
-  const { error } = await supabase.from('documents_requis').insert({ demande_id: demandeId, nom, description, obligatoire });
+  const { error } = await db.from('documents_requis').insert({ demande_id: demandeId, nom, description, obligatoire });
   if (error) { alert('Erreur lors de l\'ajout : ' + error.message); return; }
-  await supabase.from('demandes').update({ statut: 'docs_attente' }).eq('id', demandeId);
+  await db.from('demandes').update({ statut: 'docs_attente' }).eq('id', demandeId);
   closeModal();
   await loadDashboard();
   alert('Document requis ajouté avec succès.');
@@ -483,8 +483,8 @@ function showPage(name, el) {
   if (name === 'documents') loadDocumentsAdmin();
 }
 
-async function logout() { await supabase.auth.signOut(); window.location.href = 'login-client.html'; }
-if (supabase) init();
+async function logout() { await db.auth.signOut(); window.location.href = 'login-client.html'; }
+if (db) init();
 </script>
 </body>
 </html>
