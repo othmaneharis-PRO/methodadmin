@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Administration — MethodAdmin</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root { --blue:#1a56db;--blue-hover:#1240b0;--blue-light:#e8f0fe;--dark:#0f172a;--gray:#475569;--bg:#f7f8fc;--white:#fff;--border:#e2e8f0;--radius:10px;--radius-lg:20px; }
@@ -174,7 +174,17 @@
 <script>
 const SUPABASE_URL = 'https://sahbhyccnkcqjzxkyzol.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDk2NTYsImV4cCI6MjA5MDE4NTY1Nn0.oFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let supabase = null;
+try {
+  if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
+    throw new Error('SDK Supabase non chargé');
+  }
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (e) {
+  console.error('Erreur de chargement du SDK Supabase:', e);
+  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#475569;text-align:center;padding:2rem"><div><p style="font-size:1.1rem;font-weight:600;margin-bottom:.5rem">Erreur de chargement</p><p>Impossible de charger l\'application. Veuillez rafraîchir la page.</p></div></div>';
+}
 
 let allDossiers = [];
 // service_type réel en base : creation/modification/fermeture/autre
@@ -474,7 +484,7 @@ function showPage(name, el) {
 }
 
 async function logout() { await supabase.auth.signOut(); window.location.href = 'login-client.html'; }
-init();
+if (supabase) init();
 </script>
 </body>
 </html>
