@@ -304,6 +304,58 @@
     .urgence-btn.sel-tres    { border-color: #ef4444; background: #fef2f2; }
     .urgence-btn.sel-tres    .ub-label { color: #991b1b; }
 
+    /* ─── GRILLE SECTEURS ─── */
+    .secteur-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .85rem;
+    }
+    .secteur-card {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.1rem 1rem;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, transform .1s, box-shadow .15s;
+      background: var(--bg);
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+    }
+    .secteur-card:hover {
+      border-color: var(--blue);
+      background: #f0f4ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(26,86,219,.10);
+    }
+    .secteur-card.selected {
+      border-color: var(--blue);
+      background: var(--blue-light);
+      box-shadow: 0 4px 14px rgba(26,86,219,.12);
+    }
+    .secteur-icon {
+      color: var(--gray);
+      margin-bottom: .1rem;
+      transition: color .15s;
+    }
+    .secteur-card.selected .secteur-icon,
+    .secteur-card:hover .secteur-icon { color: var(--blue); }
+    .secteur-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: .88rem;
+      color: var(--dark);
+      line-height: 1.3;
+    }
+    .secteur-desc {
+      font-size: .77rem;
+      color: var(--gray);
+      line-height: 1.4;
+    }
+    @media (max-width: 480px) {
+      .secteur-grid { grid-template-columns: 1fr; }
+    }
+
     /* ─── SECTION TITLE ─── */
     .section-title {
       font-family: 'Plus Jakarta Sans', sans-serif;
@@ -664,27 +716,113 @@
 
     <!-- ═══ ÉTAPE 2 : ACTIVITÉ ═══ -->
     <div id="step-2" style="display:none">
-      <div class="section-title">Votre activité</div>
-      <div class="form-grid single">
-        <div class="field">
-          <label class="field-required" for="secteur">Secteur d'activité</label>
-          <select id="secteur">
-            <option value="">Sélectionnez un secteur...</option>
-            <option value="commerce">Commerce / Vente</option>
-            <option value="services_b2b">Services aux entreprises (B2B)</option>
-            <option value="services_b2c">Services aux particuliers (B2C)</option>
-            <option value="artisanat">Artisanat / BTP</option>
-            <option value="restauration">Restauration / Hôtellerie</option>
-            <option value="sante">Santé / Bien-être</option>
-            <option value="informatique">Informatique / Tech / Digital</option>
-            <option value="conseil">Conseil / Consulting / Formation</option>
-            <option value="immobilier">Immobilier</option>
-            <option value="culture">Culture / Médias / Communication</option>
-            <option value="transport">Transport / Logistique</option>
-            <option value="agriculture">Agriculture / Agroalimentaire</option>
-            <option value="autre">Autre secteur</option>
-          </select>
+      <div class="section-title">Quel est votre domaine d'activité ?</div>
+      <p style="font-size:.88rem;color:var(--gray);margin-bottom:1.25rem">Sélectionnez le secteur qui correspond le mieux à votre projet</p>
+
+      <!-- Input caché pour maintenir la compatibilité avec la validation existante -->
+      <input type="hidden" id="secteur" value="">
+
+      <div class="secteur-grid" id="secteur-grid">
+
+        <div class="secteur-card" data-value="conseil" onclick="selectSecteur(this)">
+          <div class="secteur-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="7" height="14"/><path d="M9 3h6v18H9z"/><rect x="15" y="11" width="7" height="10"/></svg>
+          </div>
+          <div class="secteur-name">Consultants et freelance</div>
+          <div class="secteur-desc">Conseil, expertise, missions...</div>
         </div>
+
+        <div class="secteur-card" data-value="artisanat" onclick="selectSecteur(this)">
+          <div class="secteur-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M4 20V10l8-7 8 7v10"/><path d="M9 20v-5h6v5"/></svg>
+          </div>
+          <div class="secteur-name">Construction et travaux</div>
+          <div class="secteur-desc">BTP, rénovation, artisanat du bâtiment</div>
+        </div>
+
+        <div class="secteur-card" data-value="transport" onclick="selectSecteur(this)">
+          <div class="secteur-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <div class="secteur-name">Automobile et transport</div>
+          <div class="secteur-desc">Transport de personnes ou de marchandises</div>
+        </div>
+
+        <div class="secteur-card" data-value="commerce" onclick="selectSecteur(this)">
+          <div class="secteur-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          </div>
+          <div class="secteur-name">Vente en ligne</div>
+          <div class="secteur-desc">Commerce électronique, dropshipping...</div>
+        </div>
+
+        <div class="secteur-card" data-value="commerce_detail" onclick="selectSecteur(this)">
+          <div class="secteur-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg>
+          </div>
+          <div class="secteur-name">Commerce de détail</div>
+          <div class="secteur-desc">Boutique, magasin, vente physique</div>
+        </div>
+
+        <div class="secteur-card" data-value="services_b2b" onclick="selectSecteur(this)">
+          <div class="secteur-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="secteur-name">Services aux entreprises</div>
+          <div class="secteur-desc">B2B, sous-traitance, prestation...</div>
+        </div>
+
+        <div class="secteur-card" data-value="informatique" onclick="selectSecteur(this)">
+          <div class="secteur-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div class="secteur-name">Informatique / Tech</div>
+          <div class="secteur-desc">Développement, digital, SaaS...</div>
+        </div>
+
+        <div class="secteur-card" data-value="restauration" onclick="selectSecteur(this)">
+          <div class="secteur-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          </div>
+          <div class="secteur-name">Restauration / Hôtellerie</div>
+          <div class="secteur-desc">Restaurant, traiteur, hébergement...</div>
+        </div>
+
+        <div class="secteur-card" data-value="sante" onclick="selectSecteur(this)">
+          <div class="secteur-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="secteur-name">Santé / Bien-être</div>
+          <div class="secteur-desc">Médical, paramédical, coaching...</div>
+        </div>
+
+        <div class="secteur-card" data-value="immobilier" onclick="selectSecteur(this)">
+          <div class="secteur-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="secteur-name">Immobilier</div>
+          <div class="secteur-desc">Agence, gestion locative, promotion...</div>
+        </div>
+
+        <div class="secteur-card" data-value="culture" onclick="selectSecteur(this)">
+          <div class="secteur-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          </div>
+          <div class="secteur-name">Médias / Communication</div>
+          <div class="secteur-desc">Culture, art, audiovisuel, presse...</div>
+        </div>
+
+        <div class="secteur-card" data-value="autre" onclick="selectSecteur(this)">
+          <div class="secteur-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div class="secteur-name">Autre secteur</div>
+          <div class="secteur-desc">Agriculture, éducation, autre activité...</div>
+        </div>
+
+      </div>
+
+      <div class="form-grid single" style="margin-top:1.25rem">
         <div class="field">
           <label for="nom-commercial">Nom commercial souhaité <span style="font-weight:400;color:#94a3b8">(optionnel)</span></label>
           <input type="text" id="nom-commercial" maxlength="100" placeholder="Ex: Studio Créa, Plomberie Martin, TechConsult...">
@@ -961,6 +1099,12 @@
   ];
 
   // ─── SELECT HELPERS ───
+  function selectSecteur(el) {
+    document.querySelectorAll('.secteur-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('secteur').value = el.dataset.value;
+  }
+
   function selectType(type, activeId) {
     structure = type;
     ['rc-micro','rc-ei','rc-eurl','rc-sasu'].forEach(id => {
@@ -1051,7 +1195,8 @@
     };
 
     document.getElementById('r-structure').textContent = typeLabels[structure] || structure;
-    document.getElementById('r-secteur').textContent = document.getElementById('secteur').options[document.getElementById('secteur').selectedIndex]?.text || '—';
+    const selectedCard = document.querySelector('.secteur-card.selected');
+    document.getElementById('r-secteur').textContent = selectedCard ? selectedCard.querySelector('.secteur-name').textContent : '—';
     document.getElementById('r-nomcom').textContent = document.getElementById('nom-commercial').value || 'Non renseigné';
     const desc = document.getElementById('description-activite').value;
     document.getElementById('r-desc').textContent = desc.length > 70 ? desc.substring(0, 70) + '…' : desc;
@@ -1132,7 +1277,7 @@
     // on l'intègre dans la description avec le reste des détails du projet.
     const descriptionComplete = [
       'Type de structure : ' + (structure === 'micro' ? 'Micro-entreprise' : structure === 'ei' ? 'EI' : structure === 'eurl' ? 'EURL' : 'SASU'),
-      'Secteur : ' + document.getElementById('secteur').value,
+      'Secteur : ' + (document.querySelector('.secteur-card.selected')?.querySelector('.secteur-name')?.textContent || document.getElementById('secteur').value),
       document.getElementById('nom-commercial').value ? 'Nom commercial : ' + document.getElementById('nom-commercial').value : null,
       'Activité : ' + document.getElementById('description-activite').value,
       'Adresse du siège : ' + document.getElementById('adresse').value + ', ' + document.getElementById('cp').value + ' ' + document.getElementById('ville').value + ' (' + domicile + ')',
@@ -1198,5 +1343,6 @@
     });
   });
 </script>
+<script src="cookies-banner.js"></script>
 </body>
 </html>
