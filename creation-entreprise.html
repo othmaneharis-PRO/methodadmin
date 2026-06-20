@@ -106,20 +106,20 @@
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 1.25rem 1.5rem;
+      padding: 1rem 1rem;
       margin-bottom: 1.75rem;
       display: flex;
       align-items: center;
-      gap: .4rem;
+      gap: .25rem;
     }
     .step-dot {
-      width: 34px;
-      height: 34px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: .82rem;
+      font-size: .72rem;
       font-weight: 700;
       transition: all .25s;
       flex-shrink: 0;
@@ -673,6 +673,12 @@
     <div class="step-dot todo" id="dot-5">5</div>
     <div class="step-line" id="line-5"></div>
     <div class="step-dot todo" id="dot-6">6</div>
+    <div class="step-line" id="line-6"></div>
+    <div class="step-dot todo" id="dot-7">7</div>
+    <div class="step-line" id="line-7"></div>
+    <div class="step-dot todo" id="dot-8">8</div>
+    <div class="step-line" id="line-8"></div>
+    <div class="step-dot todo" id="dot-9">9</div>
   </div>
 
   <!-- ALERT -->
@@ -824,11 +830,6 @@
 
       <div class="form-grid single" style="margin-top:1.25rem">
         <div class="field">
-          <label for="nom-commercial">Nom commercial souhaité <span style="font-weight:400;color:#94a3b8">(optionnel)</span></label>
-          <input type="text" id="nom-commercial" maxlength="100" placeholder="Ex: Studio Créa, Plomberie Martin, TechConsult...">
-          <p class="field-hint">Différent de votre nom de naissance. Peut être modifié ultérieurement.</p>
-        </div>
-        <div class="field">
           <label class="field-required" for="description-activite">Description de votre activité</label>
           <textarea id="description-activite" rows="4" maxlength="1000" placeholder="Décrivez ce que vous ferez concrètement : vente en ligne de vêtements pour enfants, prestation de conseil en marketing digital pour PME, développement d'applications mobiles sur mesure..."></textarea>
           <p class="field-hint">Minimum 20 caractères. Cette description figurera dans votre dossier.</p>
@@ -836,8 +837,47 @@
       </div>
     </div>
 
-    <!-- ═══ ÉTAPE 3 : INFORMATIONS PERSONNELLES ═══ -->
+    <!-- ═══ ÉTAPE 3 : DÉNOMINATION SOCIALE ═══ -->
     <div id="step-3" style="display:none">
+      <div class="section-title">Activité antérieure</div>
+      <div class="radio-grid" style="margin-bottom:1.25rem">
+        <div class="radio-card selected" id="ri-non" onclick="selectIndep('non','ri-non')">
+          <div class="rc-icon">👤</div>
+          <div class="rc-title">Non</div>
+          <div class="rc-desc">Je n'ai jamais eu d'activité indépendante</div>
+        </div>
+        <div class="radio-card" id="ri-oui" onclick="selectIndep('oui','ri-oui')">
+          <div class="rc-icon">✓</div>
+          <div class="rc-title">Oui</div>
+          <div class="rc-desc">J'ai déjà eu une activité professionnelle indépendante</div>
+        </div>
+      </div>
+      <p style="font-size:.8rem;color:#94a3b8;margin:-.75rem 0 1.25rem">Cette information nous aide à mieux vous accompagner dans vos démarches.</p>
+
+      <div class="section-title">Dénomination sociale</div>
+      <div class="form-grid single">
+        <div class="field">
+          <label class="field-required" for="denomination-sociale">Dénomination sociale</label>
+          <input type="text" id="denomination-sociale" maxlength="150" placeholder="Ex: SARL DUPONT CONSULTING">
+          <p class="field-hint">C'est le nom officiel de votre entreprise (peut être différent du nom commercial). Il doit être unique et ne peut pas être identique à celui d'une société existante.</p>
+        </div>
+        <div class="field">
+          <label for="nom-commercial">Nom commercial <span style="font-weight:400;color:#94a3b8">(optionnel)</span></label>
+          <input type="text" id="nom-commercial" maxlength="100" placeholder="Ex: Dupont Consulting">
+          <p class="field-hint">Le nom commercial est le nom sous lequel votre activité sera connue du public.</p>
+        </div>
+        <div class="field">
+          <label class="checkbox-wrap" id="entreprise-declaree-wrap" style="margin-top:.25rem">
+            <input type="checkbox" id="entreprise-declaree">
+            <span class="checkbox-visual"></span>
+            <span>J'ai déjà une entreprise déclarée</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ÉTAPE 4 : INFORMATIONS PERSONNELLES ═══ -->
+    <div id="step-4" style="display:none">
       <div class="section-title">Votre identité</div>
       <div class="form-grid">
         <div class="field">
@@ -881,8 +921,8 @@
       </div>
     </div>
 
-    <!-- ═══ ÉTAPE 4 : ADRESSE DU SIÈGE ═══ -->
-    <div id="step-4" style="display:none">
+    <!-- ═══ ÉTAPE 5 : ADRESSE DU SIÈGE ═══ -->
+    <div id="step-5" style="display:none">
       <div class="section-title">Adresse du siège social</div>
       <div class="form-grid single">
         <div class="field">
@@ -927,8 +967,80 @@
       </div>
     </div>
 
-    <!-- ═══ ÉTAPE 5 : OPTIONS ═══ -->
-    <div id="step-5" style="display:none">
+    <!-- ═══ ÉTAPE 6 : DURÉE ET DATES IMPORTANTES ═══ -->
+    <div id="step-6" style="display:none">
+      <div class="section-title">Durée de vie de la société</div>
+      <div class="form-grid single">
+        <div class="field">
+          <label class="field-required" for="duree-societe">Durée de la société (en années)</label>
+          <select id="duree-societe">
+            <option value="99" selected>99 ans (recommandé)</option>
+            <option value="50">50 ans</option>
+            <option value="30">30 ans</option>
+            <option value="10">10 ans</option>
+          </select>
+          <p class="field-hint">La durée maximale légale est de 99 ans. Elle peut être prolongée avant expiration.</p>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:1.25rem">Dates clés</div>
+      <div class="form-grid single">
+        <div class="field">
+          <label class="field-required" for="date-debut-activite">Date de début d'activité</label>
+          <input type="date" id="date-debut-activite">
+          <p class="field-hint">Cette date peut être aujourd'hui ou dans le futur (maximum 6 mois).</p>
+        </div>
+        <div class="field">
+          <label class="field-required" for="date-cloture-exercice">Date de clôture de l'exercice social</label>
+          <input type="text" id="date-cloture-exercice" value="31/12" placeholder="JJ/MM" maxlength="5">
+          <p class="field-hint">Par défaut le 31/12. Peut être modifiée selon vos besoins.</p>
+        </div>
+      </div>
+      <p style="text-align:center;margin-top:1rem">
+        <a href="#" onclick="event.preventDefault(); skipDatesStep()" style="font-size:.82rem;color:var(--gray);text-decoration:underline">Je ne sais pas — laisser les valeurs par défaut</a>
+      </p>
+    </div>
+
+    <!-- ═══ ÉTAPE 7 : CAPITAL SOCIAL ═══ -->
+    <div id="step-7" style="display:none">
+      <div class="section-title">Montant et composition du capital</div>
+      <div class="form-grid single">
+        <div class="field">
+          <label class="field-required" for="capital-montant">Montant du capital (en €)</label>
+          <input type="number" id="capital-montant" min="1" value="1000" placeholder="1000">
+          <p class="field-hint">Minimum 1 € pour une SARL/EURL/SAS/SASU. Nous recommandons au moins 1000 €.</p>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:1.25rem">Type d'apport</div>
+      <div class="form-grid single">
+        <label class="radio-card selected" id="apport-numeraire-wrap" style="display:flex;flex-direction:row;align-items:center;gap:.75rem" onclick="selectApport('numeraire')">
+          <div style="flex:1">
+            <div class="rc-title">Apport en numéraire</div>
+            <div class="rc-desc">Apport en argent</div>
+          </div>
+        </label>
+        <label class="radio-card" id="apport-nature-wrap" style="display:flex;flex-direction:row;align-items:center;gap:.75rem;margin-top:.6rem" onclick="selectApport('nature')">
+          <div style="flex:1">
+            <div class="rc-title">Apport en nature</div>
+            <div class="rc-desc">Biens matériels ou immatériels</div>
+          </div>
+        </label>
+        <label class="radio-card" id="apport-mixte-wrap" style="display:flex;flex-direction:row;align-items:center;gap:.75rem;margin-top:.6rem" onclick="selectApport('mixte')">
+          <div style="flex:1">
+            <div class="rc-title">Apport mixte</div>
+            <div class="rc-desc">Numéraire + nature</div>
+          </div>
+        </label>
+      </div>
+
+      <div class="recap-block" style="background:var(--blue-light);border-color:rgba(26,86,219,.2);margin-top:1.25rem">
+        <div style="font-size:.83rem;color:var(--dark);line-height:1.5"><strong>💡 À savoir</strong><br>Les apports en nature nécessitent généralement l'intervention d'un commissaire aux apports.</div>
+      </div>
+    </div>
+
+    <!-- ═══ ÉTAPE 8 : OPTIONS ═══ -->
+    <div id="step-8" style="display:none">
       <div class="section-title">Niveau d'urgence</div>
       <div class="urgence-grid">
         <div class="urgence-btn sel-normal" id="u-normal" onclick="selectUrgence('normal','u-normal')">
@@ -968,8 +1080,8 @@
       </div>
     </div>
 
-    <!-- ═══ ÉTAPE 6 : RÉCAPITULATIF ═══ -->
-    <div id="step-6" style="display:none">
+    <!-- ═══ ÉTAPE 9 : RÉCAPITULATIF ═══ -->
+    <div id="step-9" style="display:none">
       <div class="recap-block">
         <div class="recap-block-title">Structure juridique</div>
         <div class="recap-row">
@@ -984,16 +1096,27 @@
           <span class="rv" id="r-secteur">—</span>
         </div>
         <div class="recap-row">
-          <span class="rk">Nom commercial</span>
-          <span class="rv" id="r-nomcom">Non renseigné</span>
-        </div>
-        <div class="recap-row">
           <span class="rk">Description</span>
           <span class="rv" id="r-desc" style="max-width:55%;text-align:right">—</span>
         </div>
       </div>
       <div class="recap-block">
-        <div class="recap-block-title">Informations personnelles <a class="edit-link" onclick="goTo(3)">(modifier)</a></div>
+        <div class="recap-block-title">Dénomination sociale <a class="edit-link" onclick="goTo(3)">(modifier)</a></div>
+        <div class="recap-row">
+          <span class="rk">Activité indépendante antérieure</span>
+          <span class="rv" id="r-indep">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="rk">Dénomination sociale</span>
+          <span class="rv" id="r-denomination">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="rk">Nom commercial</span>
+          <span class="rv" id="r-nomcom">Non renseigné</span>
+        </div>
+      </div>
+      <div class="recap-block">
+        <div class="recap-block-title">Informations personnelles <a class="edit-link" onclick="goTo(4)">(modifier)</a></div>
         <div class="recap-row">
           <span class="rk">Nom complet</span>
           <span class="rv" id="r-nom">—</span>
@@ -1016,7 +1139,7 @@
         </div>
       </div>
       <div class="recap-block">
-        <div class="recap-block-title">Siège social <a class="edit-link" onclick="goTo(4)">(modifier)</a></div>
+        <div class="recap-block-title">Siège social <a class="edit-link" onclick="goTo(5)">(modifier)</a></div>
         <div class="recap-row">
           <span class="rk">Adresse</span>
           <span class="rv" id="r-adresse">—</span>
@@ -1027,7 +1150,33 @@
         </div>
       </div>
       <div class="recap-block">
-        <div class="recap-block-title">Options <a class="edit-link" onclick="goTo(5)">(modifier)</a></div>
+        <div class="recap-block-title">Durée et dates <a class="edit-link" onclick="goTo(6)">(modifier)</a></div>
+        <div class="recap-row">
+          <span class="rk">Durée de la société</span>
+          <span class="rv" id="r-duree">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="rk">Début d'activité</span>
+          <span class="rv" id="r-date-debut">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="rk">Clôture d'exercice</span>
+          <span class="rv" id="r-date-cloture">—</span>
+        </div>
+      </div>
+      <div class="recap-block">
+        <div class="recap-block-title">Capital social <a class="edit-link" onclick="goTo(7)">(modifier)</a></div>
+        <div class="recap-row">
+          <span class="rk">Montant</span>
+          <span class="rv" id="r-capital">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="rk">Type d'apport</span>
+          <span class="rv" id="r-apport">—</span>
+        </div>
+      </div>
+      <div class="recap-block">
+        <div class="recap-block-title">Options <a class="edit-link" onclick="goTo(8)">(modifier)</a></div>
         <div class="recap-row">
           <span class="rk">Urgence</span>
           <span class="rv" id="r-urgence">—</span>
@@ -1085,17 +1234,22 @@
   let structure = 'micro';
   let domicile = 'perso';
   let urgence = 'normal';
+  let activiteIndependante = 'non';
+  let typeApport = 'numeraire';
   let isSubmitting = false;
 
   // ─── STEP CONFIG ───
   const STEPS = [
     null,
-    { title: 'Quel type de structure souhaitez-vous créer ?',      sub: 'Étape 1 sur 6 — Choisissez la forme juridique adaptée à votre projet' },
-    { title: 'Décrivez votre activité',                             sub: 'Étape 2 sur 6 — Ces informations figurent dans votre dossier' },
-    { title: 'Vos informations personnelles',                       sub: 'Étape 3 sur 6 — Ces informations sont requises pour l\'immatriculation' },
-    { title: 'Adresse du siège social',                             sub: 'Étape 4 sur 6 — L\'adresse officielle de votre future entreprise' },
-    { title: 'Options et préférences',                              sub: 'Étape 5 sur 6 — Derniers détails avant de soumettre votre dossier' },
-    { title: 'Récapitulatif de votre demande',                      sub: 'Étape 6 sur 6 — Vérifiez et confirmez vos informations' },
+    { title: 'Quel type de structure souhaitez-vous créer ?',      sub: 'Étape 1 sur 9 — Choisissez la forme juridique adaptée à votre projet' },
+    { title: 'Décrivez votre activité',                             sub: 'Étape 2 sur 9 — Ces informations figurent dans votre dossier' },
+    { title: 'Choisissez votre dénomination sociale',                sub: 'Étape 3 sur 9 — C\'est le nom officiel de votre entreprise' },
+    { title: 'Vos informations personnelles',                       sub: 'Étape 4 sur 9 — Ces informations sont requises pour l\'immatriculation' },
+    { title: 'Adresse du siège social',                             sub: 'Étape 5 sur 9 — L\'adresse officielle de votre future entreprise' },
+    { title: 'Durée et dates importantes',                          sub: 'Étape 6 sur 9 — Définissez la durée de vie de votre société et sa date de démarrage' },
+    { title: 'Capital social',                                      sub: 'Étape 7 sur 9 — Définissez le montant et la composition de votre capital' },
+    { title: 'Options et préférences',                              sub: 'Étape 8 sur 9 — Derniers détails avant de soumettre votre dossier' },
+    { title: 'Récapitulatif de votre demande',                      sub: 'Étape 9 sur 9 — Vérifiez et confirmez vos informations' },
   ];
 
   // ─── SELECT HELPERS ───
@@ -1103,6 +1257,27 @@
     document.querySelectorAll('.secteur-card').forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
     document.getElementById('secteur').value = el.dataset.value;
+  }
+
+  function selectIndep(value, activeId) {
+    activiteIndependante = value;
+    ['ri-non','ri-oui'].forEach(id => {
+      document.getElementById(id).classList.toggle('selected', id === activeId);
+    });
+  }
+
+  function selectApport(type) {
+    typeApport = type;
+    ['apport-numeraire-wrap','apport-nature-wrap','apport-mixte-wrap'].forEach(id => {
+      document.getElementById(id).classList.toggle('selected', id === 'apport-' + type + '-wrap');
+    });
+  }
+
+  function skipDatesStep() {
+    document.getElementById('date-debut-activite').value = new Date().toISOString().split('T')[0];
+    document.getElementById('date-cloture-exercice').value = '31/12';
+    document.getElementById('duree-societe').value = '99';
+    nextStep();
   }
 
   function selectType(type, activeId) {
@@ -1147,6 +1322,11 @@
     }
 
     if (step === 3) {
+      if (!document.getElementById('denomination-sociale').value.trim())
+        return showError('Veuillez saisir la dénomination sociale de votre entreprise.');
+    }
+
+    if (step === 4) {
       const fields = [['prenom','Prénom'],['nom','Nom'],['email','Email'],['telephone','Téléphone']];
       for (const [id, label] of fields) {
         if (!document.getElementById(id).value.trim())
@@ -1157,7 +1337,7 @@
         return showError('Veuillez saisir une adresse email valide.');
     }
 
-    if (step === 4) {
+    if (step === 5) {
       if (!document.getElementById('adresse').value.trim())
         return showError('Veuillez saisir l\'adresse du siège social.');
       if (!/^\d{5}$/.test(document.getElementById('cp').value))
@@ -1166,7 +1346,20 @@
         return showError('Veuillez saisir la ville.');
     }
 
-    if (step === 5) {
+    if (step === 6) {
+      if (!document.getElementById('date-debut-activite').value)
+        return showError('Veuillez indiquer la date de début d\'activité (ou cliquez sur "Je ne sais pas").');
+      if (!/^\d{2}\/\d{2}$/.test(document.getElementById('date-cloture-exercice').value))
+        return showError('Veuillez saisir une date de clôture au format JJ/MM (ex: 31/12).');
+    }
+
+    if (step === 7) {
+      const capital = parseFloat(document.getElementById('capital-montant').value);
+      if (!capital || capital < 1)
+        return showError('Veuillez saisir un montant de capital valide (minimum 1 €).');
+    }
+
+    if (step === 8) {
       if (!document.getElementById('cgu').checked)
         return showError('Vous devez accepter les conditions générales d\'utilisation pour continuer.');
     }
@@ -1197,9 +1390,13 @@
     document.getElementById('r-structure').textContent = typeLabels[structure] || structure;
     const selectedCard = document.querySelector('.secteur-card.selected');
     document.getElementById('r-secteur').textContent = selectedCard ? selectedCard.querySelector('.secteur-name').textContent : '—';
-    document.getElementById('r-nomcom').textContent = document.getElementById('nom-commercial').value || 'Non renseigné';
     const desc = document.getElementById('description-activite').value;
     document.getElementById('r-desc').textContent = desc.length > 70 ? desc.substring(0, 70) + '…' : desc;
+
+    document.getElementById('r-indep').textContent = activiteIndependante === 'oui' ? 'Oui' : 'Non';
+    document.getElementById('r-denomination').textContent = document.getElementById('denomination-sociale').value || '—';
+    document.getElementById('r-nomcom').textContent = document.getElementById('nom-commercial').value || 'Non renseigné';
+
     document.getElementById('r-nom').textContent = document.getElementById('prenom').value + ' ' + document.getElementById('nom').value;
     document.getElementById('r-email').textContent = document.getElementById('email').value;
     document.getElementById('r-tel').textContent = document.getElementById('telephone').value;
@@ -1209,6 +1406,18 @@
     document.getElementById('r-nationalite').textContent = natSel.options[natSel.selectedIndex]?.text || '—';
     document.getElementById('r-adresse').textContent = document.getElementById('adresse').value + ', ' + document.getElementById('cp').value + ' ' + document.getElementById('ville').value;
     document.getElementById('r-domi').textContent = domiLabels[domicile] || domicile;
+
+    const dureeSel = document.getElementById('duree-societe');
+    document.getElementById('r-duree').textContent = (dureeSel.options[dureeSel.selectedIndex]?.text) || '—';
+    const dateDebut = document.getElementById('date-debut-activite').value;
+    document.getElementById('r-date-debut').textContent = dateDebut ? new Date(dateDebut + 'T00:00:00').toLocaleDateString('fr-FR') : '—';
+    document.getElementById('r-date-cloture').textContent = document.getElementById('date-cloture-exercice').value || '—';
+
+    const capital = document.getElementById('capital-montant').value;
+    document.getElementById('r-capital').textContent = capital ? capital + ' €' : '—';
+    const apportLabels = { numeraire: 'Apport en numéraire', nature: 'Apport en nature', mixte: 'Apport mixte' };
+    document.getElementById('r-apport').textContent = apportLabels[typeApport] || '—';
+
     document.getElementById('r-urgence').textContent = urgenceLabels[urgence] || urgence;
   }
 
@@ -1220,12 +1429,12 @@
 
   // ─── UPDATE UI ───
   function updateUI() {
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 9; i++) {
       const dot = document.getElementById('dot-' + i);
       if (i < current) { dot.className = 'step-dot done'; dot.textContent = '✓'; }
       else if (i === current) { dot.className = 'step-dot active'; dot.textContent = i; }
       else { dot.className = 'step-dot todo'; dot.textContent = i; }
-      if (i < 6) {
+      if (i < 9) {
         document.getElementById('line-' + i).className = 'step-line' + (i < current ? ' done' : '');
       }
       const el = document.getElementById('step-' + i);
@@ -1233,10 +1442,10 @@
     }
     document.getElementById('step-title').textContent = STEPS[current].title;
     document.getElementById('step-sub').textContent = STEPS[current].sub;
-    document.getElementById('step-counter').textContent = 'Étape ' + current + ' / 6';
+    document.getElementById('step-counter').textContent = 'Étape ' + current + ' / 9';
     document.getElementById('btn-prev').style.visibility = current > 1 ? 'visible' : 'hidden';
     const btnNext = document.getElementById('btn-next');
-    if (current === 6) {
+    if (current === 9) {
       btnNext.innerHTML = 'Envoyer ma demande ✉️';
     } else {
       btnNext.innerHTML = 'Suivant →';
@@ -1254,8 +1463,8 @@
     if (isSubmitting) return;
     if (!validate(current)) return;
 
-    if (current < 6) {
-      if (current === 5) fillRecap();
+    if (current < 9) {
+      if (current === 8) fillRecap();
       current++;
       updateUI();
       return;
@@ -1278,10 +1487,17 @@
     const descriptionComplete = [
       'Type de structure : ' + (structure === 'micro' ? 'Micro-entreprise' : structure === 'ei' ? 'EI' : structure === 'eurl' ? 'EURL' : 'SASU'),
       'Secteur : ' + (document.querySelector('.secteur-card.selected')?.querySelector('.secteur-name')?.textContent || document.getElementById('secteur').value),
-      document.getElementById('nom-commercial').value ? 'Nom commercial : ' + document.getElementById('nom-commercial').value : null,
       'Activité : ' + document.getElementById('description-activite').value,
+      'Activité indépendante antérieure : ' + (activiteIndependante === 'oui' ? 'Oui' : 'Non'),
+      'Dénomination sociale : ' + document.getElementById('denomination-sociale').value,
+      document.getElementById('nom-commercial').value ? 'Nom commercial : ' + document.getElementById('nom-commercial').value : null,
+      document.getElementById('entreprise-declaree').checked ? 'Entreprise déjà déclarée : Oui' : null,
       'Adresse du siège : ' + document.getElementById('adresse').value + ', ' + document.getElementById('cp').value + ' ' + document.getElementById('ville').value + ' (' + domicile + ')',
       'Nationalité : ' + document.getElementById('nationalite').value,
+      'Durée de la société : ' + document.getElementById('duree-societe').value + ' ans',
+      'Date de début d\'activité : ' + document.getElementById('date-debut-activite').value,
+      'Date de clôture d\'exercice : ' + document.getElementById('date-cloture-exercice').value,
+      'Capital social : ' + document.getElementById('capital-montant').value + ' € (' + typeApport + ')',
       document.getElementById('commentaire').value ? 'Commentaire : ' + document.getElementById('commentaire').value : null
     ].filter(Boolean).join('\n');
 
@@ -1318,7 +1534,7 @@
 
   function showSuccess(ref) {
     document.getElementById('ref-badge').textContent = ref;
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 9; i++) {
       const el = document.getElementById('step-' + i);
       if (el) el.style.display = 'none';
     }
@@ -1340,6 +1556,10 @@
     // Synchronise l'apparence de la case CGU (fond bleu) avec son état réel
     document.getElementById('cgu').addEventListener('change', (e) => {
       document.getElementById('cgu-wrap').classList.toggle('checked', e.target.checked);
+    });
+    // Idem pour la case "entreprise déjà déclarée"
+    document.getElementById('entreprise-declaree').addEventListener('change', (e) => {
+      document.getElementById('entreprise-declaree-wrap').classList.toggle('checked', e.target.checked);
     });
   });
 </script>
