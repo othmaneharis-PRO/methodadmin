@@ -72,7 +72,7 @@
   <nav class="sidebar">
     <div class="sidebar-section">Mon compte</div>
     <div class="sidebar-item active" onclick="showPage('dossiers', this)">📂 Mes dossiers</div>
-    <div class="sidebar-item" onclick="showPage('messages', this)">💬 Messagerie</div>
+    <div class="sidebar-item" onclick="showPage('messages', this)">💬 Messagerie <span id="msg-unread-badge-client" style="display:none;background:#ef4444;color:white;font-size:.68rem;font-weight:700;border-radius:20px;padding:.1rem .45rem;margin-left:.3rem"></span></div>
     <div class="sidebar-item" onclick="showPage('documents', this)">📄 Mes documents</div>
     <div class="sidebar-section">Actions</div>
     <div class="sidebar-item" onclick="window.location.href='creation-entreprise.html'">🚀 Nouvelle demande</div>
@@ -208,6 +208,14 @@ async function loadDossiers() {
   `).join('');
 
   populateDossierSelect();
+  updateClientUnreadBadge(myDossiers);
+}
+
+function updateClientUnreadBadge(dossiers) {
+  const total = dossiers.reduce((sum, d) => sum + (d.messages_non_lus || 0), 0);
+  const badge = document.getElementById('msg-unread-badge-client');
+  if (total > 0) { badge.textContent = total; badge.style.display = 'inline-block'; }
+  else { badge.style.display = 'none'; }
 }
 
 function populateDossierSelect() {
@@ -215,10 +223,20 @@ function populateDossierSelect() {
   if (myDossiers.length === 0) {
     sel.innerHTML = '<option value="">Aucun dossier disponible</option>';
     document.getElementById('messages-card').style.display = 'none';
+    document.getElementById('messages-selector-card').style.display = 'block';
     return;
   }
   sel.innerHTML = '<option value="">— Sélectionnez un dossier —</option>' +
     myDossiers.map(d => `<option value="${d.id}">${escapeHtml(d.reference)} (${escapeHtml(svcLabels[d.service] || d.service)})</option>`).join('');
+
+  // Un seul dossier : on ouvre directement la conversation, pas besoin de choisir
+  if (myDossiers.length === 1) {
+    document.getElementById('messages-selector-card').style.display = 'none';
+    sel.value = myDossiers[0].id;
+    selectDossierForMessages(myDossiers[0].id);
+  } else {
+    document.getElementById('messages-selector-card').style.display = 'block';
+  }
 }
 
 function selectDossierForMessages(demandeId) {
@@ -244,6 +262,10 @@ async function loadMessages() {
   container.scrollTop = container.scrollHeight;
   // Marquer les messages reçus comme lus
   await db.from('messages').update({ lu: true }).eq('demande_id', selectedDemandeId).neq('auteur_id', currentUser.id);
+  // Mettre à jour le badge non lus localement (le dossier vient d'être lu)
+  const dossier = myDossiers.find(d => d.id === selectedDemandeId);
+  if (dossier) dossier.messages_non_lus = 0;
+  updateClientUnreadBadge(myDossiers);
 }
 
 async function loadDocuments() {
