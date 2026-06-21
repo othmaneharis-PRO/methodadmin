@@ -854,6 +854,14 @@
       </div>
       <p style="font-size:.8rem;color:#94a3b8;margin:-.75rem 0 1.25rem">Cette information nous aide à mieux vous accompagner dans vos démarches.</p>
 
+      <div class="form-grid single" id="siret-field-wrap" style="display:none;margin-bottom:1.25rem">
+        <div class="field">
+          <label class="field-required" for="ancien-siret">Numéro de SIRET ou SIREN de votre ancienne activité</label>
+          <input type="text" id="ancien-siret" maxlength="14" inputmode="numeric" placeholder="Ex: 123 456 789 00012">
+          <p class="field-hint">Le SIREN comporte 9 chiffres, le SIRET en comporte 14. Vous trouverez ce numéro sur votre Kbis ou votre avis de situation INSEE.</p>
+        </div>
+      </div>
+
       <div class="section-title">Dénomination sociale</div>
       <div class="form-grid single">
         <div class="field">
@@ -1106,6 +1114,10 @@
           <span class="rk">Activité indépendante antérieure</span>
           <span class="rv" id="r-indep">—</span>
         </div>
+        <div class="recap-row" id="r-siret-row" style="display:none">
+          <span class="rk">Ancien SIRET/SIREN</span>
+          <span class="rv" id="r-siret">—</span>
+        </div>
         <div class="recap-row">
           <span class="rk">Dénomination sociale</span>
           <span class="rv" id="r-denomination">—</span>
@@ -1264,6 +1276,13 @@
     ['ri-non','ri-oui'].forEach(id => {
       document.getElementById(id).classList.toggle('selected', id === activeId);
     });
+    const siretWrap = document.getElementById('siret-field-wrap');
+    if (value === 'oui') {
+      siretWrap.style.display = 'block';
+    } else {
+      siretWrap.style.display = 'none';
+      document.getElementById('ancien-siret').value = '';
+    }
   }
 
   function selectApport(type) {
@@ -1322,6 +1341,13 @@
     }
 
     if (step === 3) {
+      if (activiteIndependante === 'oui') {
+        const siret = document.getElementById('ancien-siret').value.replace(/\s/g, '');
+        if (!siret)
+          return showError('Veuillez indiquer le SIRET ou SIREN de votre ancienne activité.');
+        if (!/^\d{9}$/.test(siret) && !/^\d{14}$/.test(siret))
+          return showError('Le numéro doit contenir 9 chiffres (SIREN) ou 14 chiffres (SIRET).');
+      }
       if (!document.getElementById('denomination-sociale').value.trim())
         return showError('Veuillez saisir la dénomination sociale de votre entreprise.');
     }
@@ -1394,6 +1420,13 @@
     document.getElementById('r-desc').textContent = desc.length > 70 ? desc.substring(0, 70) + '…' : desc;
 
     document.getElementById('r-indep').textContent = activiteIndependante === 'oui' ? 'Oui' : 'Non';
+    const siretRow = document.getElementById('r-siret-row');
+    if (activiteIndependante === 'oui') {
+      siretRow.style.display = 'flex';
+      document.getElementById('r-siret').textContent = document.getElementById('ancien-siret').value || '—';
+    } else {
+      siretRow.style.display = 'none';
+    }
     document.getElementById('r-denomination').textContent = document.getElementById('denomination-sociale').value || '—';
     document.getElementById('r-nomcom').textContent = document.getElementById('nom-commercial').value || 'Non renseigné';
 
@@ -1489,6 +1522,7 @@
       'Secteur : ' + (document.querySelector('.secteur-card.selected')?.querySelector('.secteur-name')?.textContent || document.getElementById('secteur').value),
       'Activité : ' + document.getElementById('description-activite').value,
       'Activité indépendante antérieure : ' + (activiteIndependante === 'oui' ? 'Oui' : 'Non'),
+      activiteIndependante === 'oui' ? 'Ancien SIRET/SIREN : ' + document.getElementById('ancien-siret').value : null,
       'Dénomination sociale : ' + document.getElementById('denomination-sociale').value,
       document.getElementById('nom-commercial').value ? 'Nom commercial : ' + document.getElementById('nom-commercial').value : null,
       document.getElementById('entreprise-declaree').checked ? 'Entreprise déjà déclarée : Oui' : null,
@@ -1549,6 +1583,11 @@
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cp').addEventListener('input', (e) => {
       e.target.value = e.target.value.replace(/\D/g, '');
+    });
+    // Formatage SIRET/SIREN en direct : groupes de 3 chiffres (ex: 123 456 789 00012)
+    document.getElementById('ancien-siret').addEventListener('input', (e) => {
+      const digits = e.target.value.replace(/\D/g, '').slice(0, 14);
+      e.target.value = digits.replace(/(\d{3})(?=\d)/g, '$1 ');
     });
     document.getElementById('ville').addEventListener('input', (e) => {
       e.target.value = e.target.value.replace(/\b\w/g, c => c.toUpperCase());
