@@ -361,6 +361,7 @@ function openDossier(id) {
       <button class="btn-primary" style="background:#7c3aed" onclick="openDevisModal('${d.id}')">Créer un devis</button>
       <button class="btn-primary" style="background:#0f172a" onclick="openNoteModal('${d.id}')">Note interne</button>
       <button class="btn-primary" style="background:#0891b2" onclick="openAddDocRequisModal('${d.id}')">+ Document requis</button>
+      <button class="btn-primary" style="background:#15803d" onclick="openUploadOfficielModal('${d.id}')">📤 Envoyer Kbis/document</button>
     </div>`;
   document.getElementById('modal').classList.add('open');
 }
@@ -522,6 +523,46 @@ async function addDocRequis(demandeId) {
   closeModal();
   await loadDashboard();
   alert('Document requis ajouté avec succès.');
+}
+
+function openUploadOfficielModal(demandeId) {
+  document.getElementById('modal-title').textContent = 'Envoyer un document au client';
+  document.getElementById('modal-content').innerHTML = `
+    <div class="field"><label>Nom du document</label><input type="text" id="officiel-nom" placeholder="Ex: Extrait Kbis, Statuts signés, Synthèse du dossier…"></div>
+    <div class="field">
+      <label>Fichier</label>
+      <input type="file" id="officiel-file" accept="application/pdf,image/jpeg,image/png" style="border:1.5px solid var(--border);border-radius:var(--radius);padding:.5rem;width:100%;font-size:.85rem">
+      <p style="font-size:.76rem;color:var(--gray);margin-top:.3rem">PDF, JPEG ou PNG. 20 Mo maximum.</p>
+    </div>
+    <button class="btn-primary" style="background:#15803d" onclick="uploadOfficielDocument('${demandeId}')">Envoyer au client</button>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+async function uploadOfficielDocument(demandeId) {
+  const nom = document.getElementById('officiel-nom').value.trim();
+  const fileInput = document.getElementById('officiel-file');
+  const file = fileInput.files[0];
+  if (!nom) { alert('Veuillez indiquer le nom du document.'); return; }
+  if (!file) { alert('Veuillez sélectionner un fichier.'); return; }
+  if (file.size > 20 * 1024 * 1024) { alert('Le fichier dépasse la taille maximale autorisée (20 Mo).'); return; }
+  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+  if (!allowedTypes.includes(file.type)) { alert('Type de fichier non autorisé. Formats acceptés : PDF, JPEG, PNG.'); return; }
+
+  const path = `${demandeId}/${Date.now()}_${file.name}`;
+  const { error: uploadError } = await db.storage.from('documents-officiels').upload(path, file);
+  if (uploadError) { alert('Erreur lors de l\'envoi du fichier : ' + uploadError.message); return; }
+
+  const { error: insertError } = await db.from('documents_officiels').insert({
+    demande_id: demandeId,
+    nom,
+    storage_path: path,
+    taille_bytes: file.size,
+    mime_type: file.type
+  });
+  if (insertError) { alert('Erreur lors de l\'enregistrement : ' + insertError.message); return; }
+
+  closeModal();
+  alert('Document envoyé au client avec succès.');
 }
 
 let selectedMsgDemandeId = null;
