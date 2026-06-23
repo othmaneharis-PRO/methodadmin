@@ -165,7 +165,7 @@
       nav.main-nav a.active::after { display: none; }
       .nav-cta { margin-left: auto; }
       .nav-cta .btn-nav-ghost { display: none; }
-      .burger { display: block; margin-left: auto; }
+      .burger { display: block; margin-right: .25rem; }
       .header-inner { gap: .5rem; }
     }
     @media (max-width: 540px) {
@@ -179,6 +179,9 @@
 
 <header>
   <div class="header-inner">
+    <button class="burger" id="burgerBtn" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
     <a href="index.html" class="logo" aria-label="MethodAdmin">
       <svg class="logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
         <!-- Document -->
@@ -204,9 +207,6 @@
     <div class="nav-cta">
       <a href="login-client.html" class="btn-nav-ghost" style="text-decoration:none">Connexion</a>
       <a href="login-client.html" class="btn-nav">Mon espace →</a>
-      <button class="burger" id="burgerBtn" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
     </div>
   </div>
 </header>
