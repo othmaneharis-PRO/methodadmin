@@ -15,96 +15,337 @@
       --white: #ffffff; --border: #e2e8f0;
       --radius: 10px; --radius-lg: 20px;
       --shadow: 0 4px 24px rgba(26,86,219,.10);
+      --shadow-lg: 0 20px 60px rgba(15,23,42,.12);
     }
     body { font-family: 'Nunito Sans', system-ui, sans-serif; background: var(--bg); color: var(--dark); }
-    header { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,.97); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; height: 64px; gap: 1.5rem; }
-    .logo { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--blue); text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ========== HEADER / MENU BAR ========== */
+    header { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,.97); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+    .header-inner { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; height: 72px; gap: 2rem; }
+    .logo { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.25rem; color: var(--blue); text-decoration: none; display: flex; align-items: center; gap: .5rem; }
+    .logo-mark { width: 32px; height: 32px; background: var(--blue); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: .95rem; }
     .logo span { color: var(--dark); }
-    nav { margin-left: auto; display: flex; align-items: center; gap: 1.5rem; }
-    nav a { font-size: .88rem; color: var(--gray); text-decoration: none; transition: .15s; }
-    nav a:hover { color: var(--blue); }
-    .btn-nav { background: var(--blue); color: white !important; padding: .5rem 1.1rem; border-radius: var(--radius); font-weight: 600; }
-    .btn-nav:hover { background: var(--blue-hover) !important; }
-    .hero { max-width: 1100px; margin: 0 auto; padding: 5rem 1.5rem 4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
-    .hero h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.8rem; font-weight: 800; line-height: 1.15; color: var(--dark); }
+    nav.main-nav { margin-left: auto; display: flex; align-items: center; gap: 2rem; }
+    nav.main-nav a { font-size: .9rem; color: var(--gray); text-decoration: none; transition: .15s; font-weight: 500; position: relative; }
+    nav.main-nav a:hover { color: var(--blue); }
+    nav.main-nav a.active { color: var(--blue); font-weight: 600; }
+    nav.main-nav a.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -22px; height: 2px; background: var(--blue); border-radius: 2px; }
+    .nav-cta { display: flex; align-items: center; gap: .75rem; }
+    .btn-nav-ghost { color: var(--dark) !important; padding: .5rem 1rem; font-weight: 600; font-size: .88rem; }
+    .btn-nav { background: var(--blue); color: white !important; padding: .6rem 1.2rem; border-radius: var(--radius); font-weight: 600; font-size: .88rem; transition: .15s; }
+    .btn-nav:hover { background: var(--blue-hover) !important; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(26,86,219,.3); }
+    .burger { display: none; background: none; border: none; cursor: pointer; padding: .5rem; }
+    .burger span { display: block; width: 22px; height: 2px; background: var(--dark); margin: 4px 0; transition: .2s; border-radius: 2px; }
+
+    /* ========== HERO ========== */
+    .hero-wrap { background: white; position: relative; overflow: hidden; }
+    .hero-wrap::before {
+      content: ''; position: absolute; top: -200px; right: -200px; width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--blue-light) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .hero { max-width: 1200px; margin: 0 auto; padding: 4.5rem 1.5rem 4rem; display: grid; grid-template-columns: 1.05fr 1fr; gap: 3.5rem; align-items: center; position: relative; z-index: 1; }
+    .hero-badge { display: inline-flex; align-items: center; gap: .5rem; background: var(--blue-light); color: var(--blue); padding: .4rem .9rem; border-radius: 999px; font-size: .78rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 3rem; font-weight: 800; line-height: 1.1; color: var(--dark); letter-spacing: -.02em; }
     .hero h1 span { color: var(--blue); }
-    .hero p { color: var(--gray); font-size: 1.05rem; margin-top: 1rem; line-height: 1.7; }
+    .hero .hero-lead { color: var(--gray); font-size: 1.08rem; margin-top: 1.25rem; line-height: 1.7; max-width: 520px; }
     .hero-btns { display: flex; gap: .75rem; margin-top: 2rem; flex-wrap: wrap; }
-    .btn-primary { background: var(--blue); color: white; padding: .8rem 1.6rem; border-radius: var(--radius); font-weight: 700; text-decoration: none; font-size: .95rem; transition: .15s; display: inline-block; }
-    .btn-primary:hover { background: var(--blue-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,86,219,.3); }
-    .btn-ghost { border: 1.5px solid var(--border); color: var(--gray); padding: .8rem 1.6rem; border-radius: var(--radius); font-weight: 600; text-decoration: none; font-size: .95rem; transition: .15s; display: inline-block; }
+    .btn-primary { background: var(--blue); color: white; padding: .85rem 1.7rem; border-radius: var(--radius); font-weight: 700; text-decoration: none; font-size: .95rem; transition: .15s; display: inline-block; border: none; cursor: pointer; }
+    .btn-primary:hover { background: var(--blue-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,86,219,.3); }
+    .btn-ghost { border: 1.5px solid var(--border); color: var(--gray); padding: .85rem 1.7rem; border-radius: var(--radius); font-weight: 600; text-decoration: none; font-size: .95rem; transition: .15s; display: inline-block; background: white; }
     .btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+    .hero-trust { display: flex; align-items: center; gap: 1rem; margin-top: 2rem; }
+    .trust-avatars { display: flex; }
+    .trust-avatars img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid white; object-fit: cover; margin-left: -10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .trust-avatars img:first-child { margin-left: 0; }
+    .trust-text { font-size: .82rem; color: var(--gray); }
+    .trust-text strong { color: var(--dark); }
+    .trust-stars { color: #f59e0b; font-size: .85rem; letter-spacing: 1px; }
+
+    /* HERO IMAGE COLLAGE */
+    .hero-visual { position: relative; min-height: 480px; }
+    .hero-img-main { width: 100%; height: 420px; border-radius: var(--radius-lg); object-fit: cover; box-shadow: var(--shadow-lg); }
+    .hero-img-secondary { position: absolute; bottom: -10px; left: -30px; width: 180px; height: 180px; border-radius: var(--radius-lg); object-fit: cover; box-shadow: var(--shadow-lg); border: 6px solid white; }
+    .hero-stat-card { position: absolute; top: 30px; right: -20px; background: white; border-radius: var(--radius); padding: .85rem 1.1rem; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: .7rem; }
+    .hero-stat-icon { width: 38px; height: 38px; background: var(--blue-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .hero-stat-card strong { display: block; font-family: 'Plus Jakarta Sans'; font-size: 1.05rem; color: var(--dark); }
+    .hero-stat-card small { font-size: .72rem; color: var(--gray); }
+
+    /* ========== LOGOS STRIP ========== */
+    .logos-strip { background: white; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 2rem 1.5rem; }
+    .logos-inner { max-width: 1100px; margin: 0 auto; text-align: center; }
+    .logos-label { font-size: .78rem; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 1.25rem; }
+    .logos-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2.5rem; opacity: .65; }
+    .logos-row span { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--gray); letter-spacing: -.02em; }
+
+    /* ========== STEPS ========== */
+    .steps-section { background: var(--bg); padding: 5rem 1.5rem; }
+    .steps-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.1fr; gap: 4rem; align-items: center; }
+    .steps-img { width: 100%; height: 480px; border-radius: var(--radius-lg); object-fit: cover; box-shadow: var(--shadow-lg); }
+    .section-label { font-size: .8rem; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .5rem; }
+    .section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.1rem; font-weight: 800; color: var(--dark); margin-bottom: 1rem; letter-spacing: -.01em; }
+    .section-sub { color: var(--gray); font-size: 1rem; margin-bottom: 2.5rem; line-height: 1.7; max-width: 500px; }
+    .steps-list { display: flex; flex-direction: column; gap: 1.5rem; }
+    .step-row { display: flex; gap: 1.2rem; align-items: flex-start; }
+    .step-num { flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; background: var(--blue); color: white; font-weight: 800; font-size: 1rem; display: flex; align-items: center; justify-content: center; font-family: 'Plus Jakarta Sans', sans-serif; box-shadow: 0 6px 16px rgba(26,86,219,.25); }
+    .step-row h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.05rem; color: var(--dark); margin-bottom: .25rem; }
+    .step-row p { font-size: .9rem; color: var(--gray); line-height: 1.6; }
+
+    /* ========== SERVICES ========== */
+    .services-section { max-width: 1200px; margin: 0 auto; padding: 5rem 1.5rem; }
+    .services-header { text-align: center; margin-bottom: 3rem; }
+    .services-header .section-sub { margin: 0 auto; }
+    .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+    .service-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: .25s; text-decoration: none; display: flex; flex-direction: column; }
+    .service-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--blue-light); }
+    .svc-img { width: 100%; height: 150px; object-fit: cover; }
+    .svc-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+    .svc-icon { font-size: 1.5rem; margin-bottom: .5rem; }
+    .service-card h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1rem; color: var(--dark); margin-bottom: .4rem; }
+    .service-card p { font-size: .85rem; color: var(--gray); line-height: 1.5; flex: 1; }
+    .svc-price { display: inline-block; margin-top: 1rem; font-size: .78rem; font-weight: 700; color: var(--blue); background: var(--blue-light); padding: .25rem .7rem; border-radius: 20px; align-self: flex-start; }
+
+    /* ========== FORM CTA ========== */
+    .form-cta-section { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+    .form-cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .form-cta-img { width: 100%; height: 520px; border-radius: var(--radius-lg); object-fit: cover; box-shadow: var(--shadow-lg); }
     .hero-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow); }
-    .hero-card h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.1rem; margin-bottom: 1.25rem; color: var(--dark); }
+    .hero-card h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.2rem; margin-bottom: 1.25rem; color: var(--dark); }
     .form-field { margin-bottom: .85rem; }
     .form-field label { display: block; font-size: .82rem; font-weight: 600; color: var(--dark); margin-bottom: .3rem; }
-    .form-field input, .form-field select, .form-field textarea { width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius); padding: .6rem .9rem; font-size: .88rem; color: var(--dark); background: var(--bg); font-family: inherit; }
+    .form-field input, .form-field select, .form-field textarea { width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius); padding: .65rem .9rem; font-size: .88rem; color: var(--dark); background: var(--bg); font-family: inherit; }
     .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); background: white; }
-    .service-btns { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: .5rem; }
-    .svc-btn { border: 1.5px solid var(--border); border-radius: var(--radius); padding: .5rem; text-align: center; cursor: pointer; font-size: .78rem; font-weight: 600; color: var(--gray); background: var(--bg); transition: .15s; }
+    .service-btns { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: .25rem; }
+    .svc-btn { border: 1.5px solid var(--border); border-radius: var(--radius); padding: .55rem; text-align: center; cursor: pointer; font-size: .78rem; font-weight: 600; color: var(--gray); background: var(--bg); transition: .15s; }
     .svc-btn:hover, .svc-btn.active { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
-    .submit-btn { width: 100%; background: var(--blue); color: white; border: none; border-radius: var(--radius); padding: .8rem; font-size: .95rem; font-weight: 700; cursor: pointer; margin-top: .5rem; font-family: inherit; transition: .15s; }
+    .submit-btn { width: 100%; background: var(--blue); color: white; border: none; border-radius: var(--radius); padding: .85rem; font-size: .95rem; font-weight: 700; cursor: pointer; margin-top: .5rem; font-family: inherit; transition: .15s; }
     .submit-btn:hover { background: var(--blue-hover); }
-    .steps-section { background: white; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 5rem 1.5rem; }
-    .steps-inner { max-width: 1100px; margin: 0 auto; }
-    .section-label { font-size: .8rem; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .5rem; }
-    .section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2rem; font-weight: 700; color: var(--dark); margin-bottom: 3rem; }
-    .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
-    .step-card { text-align: center; }
-    .step-num { width: 48px; height: 48px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-family: 'Plus Jakarta Sans', sans-serif; }
-    .step-card h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1rem; color: var(--dark); margin-bottom: .4rem; }
-    .step-card p { font-size: .85rem; color: var(--gray); line-height: 1.6; }
-    .services-section { max-width: 1100px; margin: 0 auto; padding: 5rem 1.5rem; }
-    .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
-    .service-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; transition: .2s; cursor: pointer; text-decoration: none; display: block; }
-    .service-card:hover { border-color: var(--blue); transform: translateY(-3px); box-shadow: var(--shadow); }
-    .svc-icon { font-size: 2rem; margin-bottom: .75rem; }
-    .service-card h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: .95rem; color: var(--dark); margin-bottom: .4rem; }
-    .service-card p { font-size: .82rem; color: var(--gray); line-height: 1.5; }
-    .svc-price { display: inline-block; margin-top: .75rem; font-size: .78rem; font-weight: 700; color: var(--blue); background: var(--blue-light); padding: .2rem .65rem; border-radius: 20px; }
-    .testi { background: var(--dark); color: white; padding: 5rem 1.5rem; text-align: center; }
-    .testi blockquote { max-width: 680px; margin: 0 auto; font-size: 1.25rem; line-height: 1.7; font-style: italic; color: #e2e8f0; }
-    .testi cite { display: block; margin-top: 1rem; font-size: .85rem; color: #94a3b8; font-style: normal; }
-    .cta-section { text-align: center; padding: 5rem 1.5rem; }
-    .cta-section h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2rem; font-weight: 700; color: var(--dark); margin-bottom: 1rem; }
-    .cta-section p { color: var(--gray); margin-bottom: 2rem; }
+    .success-msg { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius); padding: .75rem 1rem; color: #15803d; font-size: .85rem; margin-top: .75rem; text-align: center; }
+
+    /* ========== TESTIMONIAL ========== */
+    .testi { background: var(--dark); color: white; padding: 5rem 1.5rem; position: relative; overflow: hidden; }
+    .testi::before { content: ''; position: absolute; top: -100px; left: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(26,86,219,.15) 0%, transparent 70%); pointer-events: none; }
+    .testi-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 280px 1fr; gap: 3rem; align-items: center; position: relative; z-index: 1; }
+    .testi-portrait { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-lg); box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+    .testi-content .quote-mark { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 5rem; color: var(--blue); line-height: .8; margin-bottom: 1rem; }
+    .testi blockquote { font-size: 1.35rem; line-height: 1.6; color: #e2e8f0; font-weight: 300; }
+    .testi cite { display: block; margin-top: 1.5rem; font-size: .9rem; color: #94a3b8; font-style: normal; }
+    .testi cite strong { color: white; font-weight: 700; font-style: normal; display: block; font-size: 1rem; }
+
+    /* ========== CTA ========== */
+    .cta-section { text-align: center; padding: 5rem 1.5rem; max-width: 800px; margin: 0 auto; }
+    .cta-section h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--dark); margin-bottom: 1rem; letter-spacing: -.01em; }
+    .cta-section p { color: var(--gray); margin-bottom: 2rem; font-size: 1.05rem; }
+
+    /* ========== FOOTER ========== */
     footer { background: var(--dark); color: #94a3b8; padding: 3rem 1.5rem; text-align: center; font-size: .83rem; }
     footer a { color: #94a3b8; text-decoration: none; margin: 0 .75rem; }
     footer a:hover { color: white; }
-    .success-msg { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius); padding: .75rem 1rem; color: #15803d; font-size: .85rem; margin-top: .75rem; text-align: center; }
-    @media (max-width: 768px) {
-      .hero { grid-template-columns: 1fr; padding: 2.5rem 1rem; gap: 2rem; }
-      .hero h1 { font-size: 2rem; }
-      .steps-grid, .services-grid { grid-template-columns: 1fr 1fr; }
-      nav a:not(.btn-nav) { display: none; }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 960px) {
+      .hero { grid-template-columns: 1fr; padding: 2.5rem 1rem; gap: 3rem; }
+      .hero h1 { font-size: 2.1rem; }
+      .hero-visual { min-height: auto; }
+      .hero-img-main { height: 320px; }
+      .hero-img-secondary { width: 130px; height: 130px; left: 10px; bottom: -20px; }
+      .hero-stat-card { right: 10px; top: 15px; }
+      .steps-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+      .steps-img { height: 320px; order: 2; }
+      .form-cta-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .form-cta-img { height: 280px; }
+      .testi-inner { grid-template-columns: 1fr; gap: 2rem; text-align: center; }
+      .testi-portrait { max-width: 200px; margin: 0 auto; }
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
+      nav.main-nav { display: none; position: absolute; top: 72px; left: 0; right: 0; background: white; flex-direction: column; padding: 1.5rem; gap: 1rem; border-bottom: 1px solid var(--border); align-items: stretch; }
+      nav.main-nav.open { display: flex; }
+      nav.main-nav a.active::after { display: none; }
+      .nav-cta { margin-left: auto; }
+      .nav-cta .btn-nav-ghost { display: none; }
+      .burger { display: block; margin-left: auto; }
+      .header-inner { gap: .5rem; }
+    }
+    @media (max-width: 540px) {
+      .services-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 1.8rem; }
+      .section-title { font-size: 1.6rem; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <a href="index.html" class="logo">METHOD<span>ADMIN</span></a>
-  <nav>
-    <a href="services.html">Services</a>
-    <a href="faq.html">FAQ</a>
-    <a href="contact.html">Contact</a>
-    <a href="login-client.html" class="btn-nav">Mon espace</a>
-  </nav>
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark">M</span>
+      METHOD<span>ADMIN</span>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html" class="active">Accueil</a>
+      <a href="services.html">Services</a>
+      <a href="creation-entreprise.html">Création</a>
+      <a href="faq.html">FAQ</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="login-client.html" class="btn-nav-ghost" style="text-decoration:none">Connexion</a>
+      <a href="login-client.html" class="btn-nav">Mon espace →</a>
+      <button class="burger" id="burgerBtn" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
 </header>
 
-<section style="background:white">
+<!-- ========== HERO ========== -->
+<section class="hero-wrap">
   <div class="hero">
     <div>
-      <p class="section-label">🇫🇷 Formalités 100% en ligne</p>
+      <div class="hero-badge">🇫🇷 Formalités 100% en ligne · Greffe officiel</div>
       <h1>Créez votre entreprise <span>sans stress</span> en 48h</h1>
-      <p>MethodAdmin gère toutes vos formalités administratives auprès du greffe. Création, modification, radiation — on s'occupe de tout.</p>
+      <p class="hero-lead">MethodAdmin gère toutes vos formalités administratives auprès du greffe. Création, modification, radiation — on s'occupe de tout pendant que vous développez votre activité.</p>
       <div class="hero-btns">
         <a href="creation-entreprise.html" class="btn-primary">Créer mon entreprise →</a>
         <a href="services.html" class="btn-ghost">Voir tous les services</a>
       </div>
+      <div class="hero-trust">
+        <div class="trust-avatars">
+          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&h=120&fit=crop&crop=faces" alt="Client">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=faces" alt="Client">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=faces" alt="Client">
+          <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&h=120&fit=crop&crop=faces" alt="Client">
+        </div>
+        <div class="trust-text">
+          <div class="trust-stars">★★★★★</div>
+          <strong>+ 1 200 entrepreneurs</strong> nous font confiance
+        </div>
+      </div>
     </div>
+    <div class="hero-visual">
+      <img class="hero-img-main" src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&h=900&fit=crop" alt="Entrepreneure souriante au bureau">
+      <img class="hero-img-secondary" src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=400&fit=crop" alt="Documents administratifs">
+      <div class="hero-stat-card">
+        <div class="hero-stat-icon">⚡</div>
+        <div>
+          <strong>48h</strong>
+          <small>pour votre Kbis</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== LOGOS / TRUST STRIP ========== -->
+<section class="logos-strip">
+  <div class="logos-inner">
+    <p class="logos-label">Partenaires officiels &amp; institutions</p>
+    <div class="logos-row">
+      <span>INPI</span>
+      <span>Greffe du Tribunal</span>
+      <span>URSSAF</span>
+      <span>Infogreffe</span>
+      <span>JAL</span>
+      <span>BODACC</span>
+    </div>
+  </div>
+</section>
+
+<!-- ========== STEPS ========== -->
+<section class="steps-section">
+  <div class="steps-inner">
+    <img class="steps-img" src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=900&h=1000&fit=crop" alt="Équipe MethodAdmin en réunion">
+    <div>
+      <p class="section-label">Notre processus</p>
+      <h2 class="section-title">Une création d'entreprise en 4 étapes simples</h2>
+      <p class="section-sub">Un parcours fluide, transparent et entièrement digitalisé pour donner vie à votre projet sans paperasse.</p>
+      <div class="steps-list">
+        <div class="step-row">
+          <div class="step-num">1</div>
+          <div>
+            <h3>Remplissez le formulaire en ligne</h3>
+            <p>En 5 minutes, décrivez votre projet et renseignez vos informations de base depuis notre interface sécurisée.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num">2</div>
+          <div>
+            <h3>Recevez votre devis personnalisé</h3>
+            <p>Sous 24h, notre équipe vous envoie un devis détaillé, transparent et sans frais cachés.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num">3</div>
+          <div>
+            <h3>Transmettez vos pièces justificatives</h3>
+            <p>Uploadez vos documents directement dans votre espace client sécurisé. On vérifie tout pour vous.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num">4</div>
+          <div>
+            <h3>Recevez votre extrait Kbis</h3>
+            <p>On dépose votre dossier au greffe et vous livrons votre Kbis officiel par email sous 48h.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SERVICES ========== -->
+<section class="services-section">
+  <div class="services-header">
+    <p class="section-label">Nos services</p>
+    <h2 class="section-title">Ce que nous faisons pour vous</h2>
+    <p class="section-sub">Toutes les formalités de la vie de votre entreprise, traitées par des experts du droit des sociétés.</p>
+  </div>
+  <div class="services-grid">
+    <a href="creation-entreprise.html" class="service-card">
+      <img class="svc-img" src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=500&h=350&fit=crop" alt="Création d'entreprise">
+      <div class="svc-body">
+        <div class="svc-icon">🚀</div>
+        <h3>Création d'entreprise</h3>
+        <p>Micro, EI, EURL, SASU, SARL, SAS — toutes les formes juridiques disponibles.</p>
+        <span class="svc-price">Dès 149 €</span>
+      </div>
+    </a>
+    <a href="services.html#modification" class="service-card">
+      <img class="svc-img" src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=500&h=350&fit=crop" alt="Modification statuts">
+      <div class="svc-body">
+        <div class="svc-icon">✏️</div>
+        <h3>Modification</h3>
+        <p>Changement de siège, gérant, objet social, capital, dénomination...</p>
+        <span class="svc-price">Dès 99 €</span>
+      </div>
+    </a>
+    <a href="services.html#fermeture" class="service-card">
+      <img class="svc-img" src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=500&h=350&fit=crop" alt="Fermeture entreprise">
+      <div class="svc-body">
+        <div class="svc-icon">🔒</div>
+        <h3>Fermeture / Radiation</h3>
+        <p>Dissolution, liquidation et radiation officielle au registre du commerce.</p>
+        <span class="svc-price">Dès 199 €</span>
+      </div>
+    </a>
+    <a href="services.html#kbis" class="service-card">
+      <img class="svc-img" src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=500&h=350&fit=crop&sat=-30" alt="Extrait Kbis">
+      <div class="svc-body">
+        <div class="svc-icon">📄</div>
+        <h3>Extrait Kbis</h3>
+        <p>Obtention rapide de votre extrait Kbis officiel délivré par le greffe.</p>
+        <span class="svc-price">Dès 29 €</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ========== FORM CTA WITH IMAGE ========== -->
+<section class="form-cta-section">
+  <div class="form-cta-grid">
+    <img class="form-cta-img" src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=900&h=1100&fit=crop" alt="Consultant MethodAdmin">
     <div class="hero-card">
-      <h3>Demande rapide</h3>
+      <h3>Demandez un devis gratuit</h3>
       <div id="alert-success" class="success-msg">✅ Demande reçue ! Référence : <strong id="ref-display"></strong></div>
       <form id="quick-form">
         <div class="form-field">
@@ -138,75 +379,26 @@
   </div>
 </section>
 
-<section class="steps-section">
-  <div class="steps-inner">
-    <p class="section-label">Notre processus</p>
-    <h2 class="section-title">Comment ça marche ?</h2>
-    <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-num">1</div>
-        <h3>Remplissez le formulaire</h3>
-        <p>En 5 minutes, décrivez votre projet et vos informations de base.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-num">2</div>
-        <h3>Recevez votre devis</h3>
-        <p>Sous 24h, notre équipe vous envoie un devis détaillé et transparent.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-num">3</div>
-        <h3>Transmettez vos pièces</h3>
-        <p>Uploadez vos documents directement dans votre espace client sécurisé.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-num">4</div>
-        <h3>Recevez votre Kbis</h3>
-        <p>On dépose votre dossier au greffe et vous livrons votre extrait Kbis.</p>
-      </div>
+<!-- ========== TESTIMONIAL ========== -->
+<section class="testi">
+  <div class="testi-inner">
+    <img class="testi-portrait" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&h=500&fit=crop&crop=faces" alt="Sophie M.">
+    <div class="testi-content">
+      <div class="quote-mark">"</div>
+      <blockquote>MethodAdmin m'a fait gagner un temps fou. En 48h j'avais mon Kbis et je pouvais commencer à facturer mes clients. Service impeccable, équipe réactive — je recommande à tous les futurs entrepreneurs.</blockquote>
+      <cite>
+        <strong>Sophie M.</strong>
+        Fondatrice de Studio Atelier · Paris
+      </cite>
     </div>
   </div>
 </section>
 
-<section class="services-section">
-  <p class="section-label">Nos services</p>
-  <h2 class="section-title">Ce que nous faisons pour vous</h2>
-  <div class="services-grid">
-    <a href="creation-entreprise.html" class="service-card">
-      <div class="svc-icon">🚀</div>
-      <h3>Création d'entreprise</h3>
-      <p>Micro, EI, EURL, SASU — toutes les formes juridiques.</p>
-      <span class="svc-price">Dès 149 €</span>
-    </a>
-    <a href="services.html#modification" class="service-card">
-      <div class="svc-icon">✏️</div>
-      <h3>Modification</h3>
-      <p>Changement de siège, gérant, objet social, capital...</p>
-      <span class="svc-price">Dès 99 €</span>
-    </a>
-    <a href="services.html#fermeture" class="service-card">
-      <div class="svc-icon">🔒</div>
-      <h3>Fermeture / Radiation</h3>
-      <p>Dissolution, liquidation et radiation au registre.</p>
-      <span class="svc-price">Dès 199 €</span>
-    </a>
-    <a href="services.html#kbis" class="service-card">
-      <div class="svc-icon">📄</div>
-      <h3>Extrait Kbis</h3>
-      <p>Obtention rapide de votre extrait Kbis officiel.</p>
-      <span class="svc-price">Dès 29 €</span>
-    </a>
-  </div>
-</section>
-
-<section class="testi">
-  <blockquote>"MethodAdmin m'a fait gagner un temps fou. En 48h j'avais mon Kbis et je pouvais commencer à facturer mes clients. Service impeccable, équipe réactive."</blockquote>
-  <cite>— Sophie M., fondatrice de Studio Atelier</cite>
-</section>
-
+<!-- ========== CTA ========== -->
 <section class="cta-section">
   <h2>Prêt à lancer votre projet ?</h2>
-  <p>Rejoignez les centaines d'entrepreneurs qui nous font confiance chaque mois.</p>
-  <a href="creation-entreprise.html" class="btn-primary" style="font-size:1rem;padding:.9rem 2rem">Démarrer maintenant →</a>
+  <p>Rejoignez les centaines d'entrepreneurs qui nous font confiance chaque mois pour leurs formalités.</p>
+  <a href="creation-entreprise.html" class="btn-primary" style="font-size:1rem;padding:.95rem 2.2rem">Démarrer maintenant →</a>
 </section>
 
 <footer>
@@ -216,6 +408,7 @@
     <a href="contact.html">Contact</a>
     <a href="mentions-legales.html">Mentions légales</a>
     <a href="confidentialite.html">Confidentialité</a>
+    <a href="cgu.html">CGU</a>
   </p>
   <p>© 2026 MethodAdmin — Tous droits réservés</p>
 </footer>
@@ -235,6 +428,11 @@ try {
   console.error('Erreur de chargement du SDK Supabase:', e);
   sdkLoadError = true;
 }
+
+// Burger menu
+document.getElementById('burgerBtn').addEventListener('click', () => {
+  document.getElementById('mainNav').classList.toggle('open');
+});
 
 let selectedSvc = 'creation';
 
