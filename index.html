@@ -184,14 +184,24 @@
       nav.main-nav a.active::after { display: none; }
       .nav-cta { margin-left: auto; }
       .nav-cta .btn-nav-ghost { display: none; }
+      .nav-cta .btn-nav { white-space: nowrap; padding: .45rem .85rem; font-size: .82rem; }
       .burger { display: block; margin-right: .25rem; }
-      .header-inner { gap: .5rem; }
+      .header-inner { gap: .5rem; flex-wrap: nowrap; }
+      .logo { font-size: 1.1rem; gap: .45rem; min-width: 0; }
+      .logo-icon { width: 32px; height: 32px; }
+      .logo-text { font-size: .95rem; white-space: nowrap; }
     }
     @media (max-width: 540px) {
       .services-grid { grid-template-columns: 1fr; }
       .tutorial-grid { grid-template-columns: 1fr; }
       .hero h1 { font-size: 1.8rem; }
       .section-title { font-size: 1.6rem; }
+      .logo-text { font-size: .82rem; }
+      .logo-icon { width: 28px; height: 28px; }
+      .nav-cta .btn-nav { padding: .4rem .7rem; font-size: .78rem; }
+    }
+    @media (max-width: 380px) {
+      .logo-text { display: none; }
     }
   </style>
 </head>
