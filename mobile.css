@@ -1,0 +1,317 @@
+/* ============================================================
+   MethodAdmin — Améliorations mobile uniquement (< 768px)
+   N'affecte PAS l'affichage desktop.
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+  /* ---------- HEADER global ---------- */
+  header, .header {
+    padding: .65rem .9rem !important;
+    height: auto !important;
+    min-height: 56px;
+    gap: .5rem !important;
+    flex-wrap: wrap;
+  }
+  header .logo, .header .logo {
+    font-size: 1rem !important;
+  }
+  /* Navigation classique : repli sous le logo */
+  header nav, .header nav {
+    width: 100%;
+    margin-left: 0 !important;
+    justify-content: flex-start;
+    gap: .65rem !important;
+    flex-wrap: wrap;
+    border-top: 1px solid #e2e8f0;
+    padding-top: .55rem;
+    margin-top: .25rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  header nav a, .header nav a {
+    font-size: .82rem !important;
+    padding: .25rem 0 !important;
+    white-space: nowrap;
+  }
+  header nav .btn-nav,
+  .header nav .btn-nav {
+    padding: .4rem .85rem !important;
+    font-size: .78rem !important;
+    margin-left: auto;
+  }
+
+  /* Espace-client / admin : user-info à droite mais compact */
+  .user-info {
+    margin-left: auto !important;
+    gap: .5rem !important;
+  }
+  .user-info .user-badge {
+    font-size: .78rem !important;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .btn-logout {
+    font-size: .76rem !important;
+    padding: .3rem .65rem !important;
+  }
+
+  /* ---------- MAIN ---------- */
+  main, .main {
+    padding: 1.5rem 1rem 2rem !important;
+    margin: 1rem auto !important;
+    max-width: 100% !important;
+  }
+
+  /* Titres */
+  main h1, .hero-txt h1 {
+    font-size: 1.55rem !important;
+    line-height: 1.2 !important;
+  }
+  main h2, .page-title {
+    font-size: 1.25rem !important;
+  }
+  .hero-txt p, .subtitle {
+    font-size: .9rem !important;
+  }
+
+  /* ---------- SERVICES (services.html) ---------- */
+  .service-block {
+    grid-template-columns: 1fr !important;
+    padding: 1.35rem !important;
+    gap: .9rem !important;
+  }
+  .service-block .svc-icon {
+    font-size: 2rem !important;
+  }
+  .service-block .svc-title {
+    font-size: 1.05rem !important;
+  }
+  .svc-price-box {
+    min-width: 0 !important;
+    width: 100%;
+    padding: .85rem 1rem !important;
+  }
+
+  /* ---------- FAQ (faq.html) ---------- */
+  .faq-q {
+    font-size: .87rem !important;
+    padding: .95rem 1rem !important;
+    line-height: 1.4;
+  }
+  .faq-a {
+    padding: 0 1rem 1rem !important;
+    font-size: .83rem !important;
+  }
+  .faq-section {
+    font-size: .72rem !important;
+  }
+
+  /* ---------- CONTACT (contact.html) ---------- */
+  .contact-grid,
+  .contact-wrap,
+  .contact-row,
+  .contact-cols {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  /* ---------- FORMULAIRES (création, contact, login, reset) ---------- */
+  form input,
+  form select,
+  form textarea {
+    font-size: 16px !important; /* évite zoom iOS */
+  }
+  .form-grid,
+  .grid-2,
+  .grid-3,
+  .grid-cols-2,
+  .grid-cols-3 {
+    grid-template-columns: 1fr !important;
+    gap: .75rem !important;
+  }
+  .form-card,
+  .auth-card,
+  .login-card,
+  .reset-card,
+  .signup-card {
+    margin: 1rem !important;
+    padding: 1.5rem 1.25rem !important;
+    max-width: none !important;
+    width: auto !important;
+  }
+  .form-actions,
+  .auth-actions {
+    flex-direction: column !important;
+    gap: .65rem !important;
+  }
+  .form-actions button,
+  .form-actions .btn,
+  .auth-actions button {
+    width: 100%;
+  }
+
+  /* ---------- CRÉATION-ENTREPRISE (parcours multi-étapes) ---------- */
+  .steps-progress,
+  .progress-steps {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: .25rem;
+  }
+  .wizard-grid,
+  .wizard-content,
+  .form-wizard {
+    grid-template-columns: 1fr !important;
+  }
+  .summary-card,
+  .recap-card,
+  .sidebar-recap {
+    position: static !important;
+    margin-top: 1.5rem !important;
+  }
+  .form-juridique-grid,
+  .juridique-options {
+    grid-template-columns: 1fr !important;
+  }
+  .nav-buttons,
+  .wizard-nav {
+    flex-direction: column-reverse !important;
+    gap: .65rem !important;
+  }
+  .nav-buttons button,
+  .wizard-nav button {
+    width: 100%;
+  }
+
+  /* ---------- ESPACE CLIENT & ADMIN ---------- */
+  .layout {
+    grid-template-columns: 1fr !important;
+    min-height: auto !important;
+  }
+  .sidebar {
+    padding: .5rem 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border-bottom: 1px solid #1e293b;
+    position: sticky;
+    top: 56px;
+    z-index: 40;
+  }
+  .sidebar-section {
+    display: none !important;
+  }
+  .sidebar-item {
+    flex: 0 0 auto;
+    border-left: none !important;
+    border-bottom: 3px solid transparent;
+    padding: .55rem .85rem !important;
+    font-size: .8rem !important;
+    white-space: nowrap;
+  }
+  .sidebar-item.active {
+    border-left: none !important;
+    border-bottom-color: var(--blue, #1a56db) !important;
+  }
+  .content {
+    padding: 1.25rem 1rem !important;
+    max-width: 100% !important;
+  }
+
+  /* Cartes dossier */
+  .dossier-card {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: .55rem !important;
+    padding: 1rem 1.15rem !important;
+  }
+  .dossier-date {
+    margin-left: 0 !important;
+  }
+  .card {
+    padding: 1.15rem !important;
+  }
+
+  /* Messagerie */
+  .msg-bubble {
+    max-width: 90% !important;
+    padding: .7rem .85rem !important;
+  }
+  .msg-input-row {
+    flex-direction: column;
+    gap: .5rem !important;
+  }
+  .msg-input-row button {
+    width: 100%;
+  }
+
+  /* Admin tableaux */
+  .admin-grid,
+  .stats-grid,
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: .75rem !important;
+  }
+  table {
+    font-size: .78rem !important;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  /* ---------- BOUTONS génériques ---------- */
+  .btn-primary,
+  .btn-ghost,
+  .btn-secondary {
+    font-size: .9rem !important;
+    padding: .65rem 1.1rem !important;
+  }
+
+  /* ---------- IMAGES sûres ---------- */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    padding: 2rem 1rem !important;
+  }
+  footer p a {
+    display: inline-block;
+    margin: .3rem .35rem !important;
+    font-size: .8rem !important;
+  }
+
+  /* ---------- PAGES LÉGALES (cgu, mentions, confidentialité) ---------- */
+  .legal-content,
+  .legal-page,
+  article {
+    padding: 0 !important;
+    font-size: .92rem !important;
+  }
+  article h1, .legal-content h1 {
+    font-size: 1.55rem !important;
+  }
+  article h2, .legal-content h2 {
+    font-size: 1.15rem !important;
+    margin-top: 1.5rem !important;
+  }
+}
+
+/* ---------- Très petits écrans (≤ 380px) ---------- */
+@media (max-width: 380px) {
+  main h1, .hero-txt h1 {
+    font-size: 1.35rem !important;
+  }
+  header .logo, .header .logo {
+    font-size: .92rem !important;
+  }
+  header nav a, .header nav a {
+    font-size: .78rem !important;
+  }
+}
