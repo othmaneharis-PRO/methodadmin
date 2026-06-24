@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fermeture / Radiation — MethodAdmin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="supabase.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --blue:#1a56db; --blue-hover:#1240b0; --blue-light:#e8f0fe; --dark:#0f172a; --gray:#475569; --bg:#f7f8fc; --white:#fff; --border:#e2e8f0; --radius:10px; --radius-lg:20px; --shadow:0 4px 24px rgba(26,86,219,.10); }
+    body { font-family:'Nunito Sans',system-ui,sans-serif; background:var(--bg); color:var(--dark); }
+    header { background:rgba(255,255,255,.97); border-bottom:1px solid var(--border); padding:0 1.5rem; display:flex; align-items:center; height:64px; gap:1rem; position:sticky; top:0; z-index:100; }
+    .logo { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.15rem; color:var(--blue); text-decoration:none; }
+    .logo span { color:var(--dark); }
+    .header-sub { font-size:.85rem; color:var(--gray); padding-left:1rem; border-left:1px solid var(--border); }
+    .back-link { margin-left:auto; font-size:.85rem; color:var(--gray); text-decoration:none; transition:.15s; }
+    .back-link:hover { color:var(--blue); }
+    main { max-width:880px; margin:2.5rem auto; padding:0 1.5rem 4rem; }
+    .page-head { text-align:center; margin-bottom:2.5rem; }
+    .page-badge { display:inline-block; font-size:.78rem; font-weight:700; color:var(--blue); background:var(--blue-light); padding:.3rem .85rem; border-radius:999px; margin-bottom:1rem; }
+    h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:2rem; font-weight:800; color:var(--dark); letter-spacing:-.01em; }
+    .page-head p { color:var(--gray); margin-top:.75rem; font-size:1rem; line-height:1.6; max-width:580px; margin-left:auto; margin-right:auto; }
+    .card { background:white; border:1px solid var(--border); border-radius:var(--radius-lg); padding:2rem; margin-bottom:1.25rem; box-shadow:var(--shadow); }
+    .card-title { font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:1.05rem; color:var(--dark); margin-bottom:.4rem; display:flex; align-items:center; gap:.6rem; }
+    .card-num { width:28px; height:28px; border-radius:50%; background:var(--blue); color:white; font-size:.82rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .card-desc { color:var(--gray); font-size:.85rem; margin-bottom:1.25rem; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
+    .field { margin-bottom:.85rem; }
+    .field label { display:block; font-size:.83rem; font-weight:600; color:var(--dark); margin-bottom:.3rem; }
+    .field label .req { color:#ef4444; }
+    .field input, .field select, .field textarea { width:100%; border:1.5px solid var(--border); border-radius:var(--radius); padding:.65rem .9rem; font-size:.9rem; color:var(--dark); background:var(--bg); font-family:inherit; transition:.15s; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-light); background:white; }
+    .field small { display:block; font-size:.72rem; color:var(--gray); margin-top:.25rem; }
+    .radio-group { display:grid; grid-template-columns:1fr 1fr; gap:.7rem; }
+    .radio-card { border:1.5px solid var(--border); border-radius:var(--radius); padding:1rem 1.1rem; cursor:pointer; background:var(--bg); transition:.15s; }
+    .radio-card:hover { border-color:var(--blue); }
+    .radio-card.checked { border-color:var(--blue); background:var(--blue-light); }
+    .radio-card input { display:none; }
+    .radio-card-title { font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:.92rem; color:var(--dark); display:flex; align-items:center; gap:.45rem; }
+    .radio-card-desc { font-size:.78rem; color:var(--gray); margin-top:.3rem; line-height:1.5; }
+    .conditional { display:none; }
+    .conditional.show { display:block; animation:slide .2s ease; }
+    @keyframes slide { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+    .cgu-row { display:flex; gap:.65rem; align-items:flex-start; padding:1rem; border:1.5px solid var(--border); border-radius:var(--radius); background:var(--bg); cursor:pointer; margin-bottom:1rem; }
+    .cgu-row.checked { border-color:var(--blue); background:var(--blue-light); }
+    .cgu-row input { margin-top:.2rem; }
+    .cgu-row label { font-size:.83rem; color:var(--dark); line-height:1.5; cursor:pointer; }
+    .cgu-row a { color:var(--blue); text-decoration:underline; }
+    .submit-btn { width:100%; background:var(--blue); color:white; border:none; border-radius:var(--radius); padding:1rem; font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit; transition:.15s; }
+    .submit-btn:hover:not(:disabled) { background:var(--blue-hover); transform:translateY(-1px); box-shadow:0 6px 20px rgba(26,86,219,.3); }
+    .submit-btn:disabled { opacity:.5; cursor:not-allowed; }
+    .alert { padding:1rem 1.25rem; border-radius:var(--radius); margin-bottom:1rem; font-size:.88rem; display:none; }
+    .alert.show { display:block; }
+    .alert.error { background:#fee2e2; border:1px solid #fecaca; color:#991b1b; }
+    .success-screen { display:none; text-align:center; padding:3rem 1.5rem; }
+    .success-screen.show { display:block; }
+    .success-icon { width:72px; height:72px; border-radius:50%; background:#d1fae5; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem; font-size:2rem; }
+    .success-screen h2 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.75rem; font-weight:800; color:var(--dark); margin-bottom:.75rem; }
+    .success-screen p { color:var(--gray); margin-bottom:1.5rem; font-size:.95rem; line-height:1.6; }
+    .ref-badge { display:inline-block; font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:1.1rem; color:var(--blue); background:var(--blue-light); padding:.6rem 1.25rem; border-radius:var(--radius); margin-bottom:2rem; letter-spacing:.05em; }
+    .info-banner { background:linear-gradient(135deg, #fef9c3 0%, #fef3c7 100%); border:1.5px solid #facc15; border-radius:var(--radius-lg); padding:1.1rem 1.25rem; display:flex; gap:.85rem; align-items:flex-start; margin-bottom:1.5rem; }
+    .info-banner-icon { font-size:1.3rem; flex-shrink:0; line-height:1.2; }
+    .info-banner-content { color:#713f12; font-size:.86rem; line-height:1.55; }
+    .info-banner-content strong { color:#422006; display:block; font-family:'Plus Jakarta Sans',sans-serif; font-size:.95rem; margin-bottom:.2rem; }
+    footer { background:var(--dark); color:#94a3b8; padding:2.5rem 1.5rem; text-align:center; font-size:.83rem; margin-top:3rem; }
+    footer a { color:#94a3b8; text-decoration:none; margin:0 .75rem; }
+    @media (max-width:768px) {
+      .grid-2, .radio-group { grid-template-columns:1fr !important; }
+      .card { padding:1.5rem 1.25rem; }
+      h1 { font-size:1.5rem; }
+      main { padding:0 1rem 2rem; margin:1.5rem auto; }
+    }
+  </style>
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">METHOD<span>ADMIN</span></a>
+  <span class="header-sub">Fermeture / Radiation</span>
+  <a href="index.html" class="back-link">← Retour</a>
+</header>
+
+<main>
+  <div class="page-head">
+    <span class="page-badge">🔒 Cessation d'activité</span>
+    <h1>Fermer votre entreprise</h1>
+    <p>Dissolution, liquidation amiable ou radiation simple — nous déposons votre dossier au Guichet Unique INPI et au greffe compétent.</p>
+  </div>
+
+  <div id="success-screen" class="success-screen">
+    <div class="success-icon">✅</div>
+    <h2>Demande de fermeture reçue</h2>
+    <p>Notre équipe analyse votre dossier et vous envoie un devis détaillé sous 24h ouvrées par email.</p>
+    <div class="ref-badge">Réf. <span id="ref-display"></span></div>
+    <p style="font-size:.85rem">📧 Pour suivre votre demande, créez votre compte avec <strong>la même adresse email</strong> :</p>
+    <a href="login-client.html" class="submit-btn" style="display:inline-block;text-decoration:none;width:auto;padding:.85rem 1.75rem;margin-top:.5rem">Créer mon espace client →</a>
+  </div>
+
+  <form id="form-fermeture">
+    <div id="alert-error" class="alert error"></div>
+
+    <!-- 1. Type de cessation -->
+    <div class="card">
+      <div class="card-title"><span class="card-num">1</span> Type de cessation d'activité</div>
+      <div class="card-desc">Sélectionnez la situation correspondant à votre entreprise.</div>
+      <div class="radio-group">
+        <label class="radio-card" data-target="dissolution">
+          <input type="radio" name="type" value="dissolution-liquidation">
+          <div class="radio-card-title">⚖️ Dissolution-liquidation</div>
+          <div class="radio-card-desc">Société (SARL, SAS, EURL, SASU...) — clôture définitive avec liquidateur amiable</div>
+        </label>
+        <label class="radio-card" data-target="dissolution-only">
+          <input type="radio" name="type" value="dissolution">
+          <div class="radio-card-title">📋 Dissolution seule</div>
+          <div class="radio-card-desc">Première étape pour une société — la liquidation interviendra ensuite</div>
+        </label>
+        <label class="radio-card" data-target="radiation-ei">
+          <input type="radio" name="type" value="radiation-ei">
+          <div class="radio-card-title">🧾 Radiation EI / Micro</div>
+          <div class="radio-card-desc">Entreprise individuelle ou micro-entreprise — cessation simple</div>
+        </label>
+        <label class="radio-card" data-target="cessation">
+          <input type="radio" name="type" value="cessation-totale">
+          <div class="radio-card-title">🛑 Cessation totale d'activité</div>
+          <div class="radio-card-desc">Arrêt complet sans dissolution (mise en sommeil non concernée)</div>
+        </label>
+      </div>
+    </div>
+
+    <!-- 2. Identification entreprise -->
+    <div class="card">
+      <div class="card-title"><span class="card-num">2</span> Identification de l'entreprise</div>
+      <div class="grid-2">
+        <div class="field">
+          <label>SIREN <span class="req">*</span></label>
+          <input type="text" id="siren" maxlength="11" placeholder="123 456 789" required>
+          <small>9 chiffres</small>
+        </div>
+        <div class="field">
+          <label>Forme juridique <span class="req">*</span></label>
+          <select id="forme" required>
+            <option value="">— Sélectionner —</option>
+            <option>Micro-entreprise</option>
+            <option>EI (Entreprise Individuelle)</option>
+            <option>EURL</option>
+            <option>SASU</option>
+            <option>SARL</option>
+            <option>SAS</option>
+            <option>SA</option>
+            <option>SCI</option>
+            <option>Autre</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Dénomination sociale <span class="req">*</span></label>
+        <input type="text" id="denom" maxlength="200" placeholder="Ex : MA SOCIÉTÉ SARL" required>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Date de cessation souhaitée</label>
+          <input type="date" id="date-cessation">
+          <small>Date d'effet de l'arrêt d'activité</small>
+        </div>
+        <div class="field">
+          <label>Motif</label>
+          <select id="motif">
+            <option value="">— Sélectionner —</option>
+            <option>Départ à la retraite</option>
+            <option>Cession / vente</option>
+            <option>Activité non rentable</option>
+            <option>Reconversion</option>
+            <option>Décès / incapacité</option>
+            <option>Autre</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Liquidateur (conditionnel) -->
+    <div class="card conditional" id="block-dissolution">
+      <div class="card-title">👤 Liquidateur amiable</div>
+      <div class="card-desc">Personne désignée pour réaliser les opérations de liquidation.</div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Prénom du liquidateur</label>
+          <input type="text" id="liq-prenom" maxlength="80">
+        </div>
+        <div class="field">
+          <label>Nom du liquidateur</label>
+          <input type="text" id="liq-nom" maxlength="80">
+        </div>
+      </div>
+      <div class="field">
+        <label>Adresse de conservation des documents</label>
+        <input type="text" id="liq-adresse" placeholder="N° et rue, code postal, ville">
+        <small>Adresse où seront conservés les documents de la société pendant 5 ans après la radiation</small>
+      </div>
+    </div>
+
+    <!-- 4. Coordonnées déclarant -->
+    <div class="card">
+      <div class="card-title"><span class="card-num">3</span> Vos coordonnées</div>
+      <div class="card-desc">Pour vous transmettre le devis et suivre votre dossier.</div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Prénom <span class="req">*</span></label>
+          <input type="text" id="prenom" maxlength="80" required>
+        </div>
+        <div class="field">
+          <label>Nom <span class="req">*</span></label>
+          <input type="text" id="nom" maxlength="80" required>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" id="email" maxlength="120" required>
+        </div>
+        <div class="field">
+          <label>Téléphone</label>
+          <input type="tel" id="telephone" maxlength="20" placeholder="06 12 34 56 78">
+        </div>
+      </div>
+      <div class="field">
+        <label>Précisions complémentaires</label>
+        <textarea id="commentaire" rows="3" maxlength="1000" placeholder="Toute information utile : urgence, contexte, situation comptable, dettes éventuelles..."></textarea>
+      </div>
+    </div>
+
+    <div class="info-banner">
+      <div class="info-banner-icon">💡</div>
+      <div class="info-banner-content">
+        <strong>Suivi de votre demande</strong>
+        Pour suivre l'état d'avancement, créez votre espace client avec <em style="color:var(--blue);font-style:normal;font-weight:700">la même adresse email</em> que celle renseignée ci-dessus.
+      </div>
+    </div>
+
+    <label class="cgu-row" id="cgu-wrap">
+      <input type="checkbox" id="cgu" required>
+      <label for="cgu">J'accepte les <a href="cgu.html" target="_blank">CGU</a> et la <a href="confidentialite.html" target="_blank">politique de confidentialité</a>. Aucun paiement n'est effectué tant que je n'ai pas validé le devis.</label>
+    </label>
+
+    <button type="submit" class="submit-btn" id="submit-btn">Envoyer ma demande de fermeture ✉️</button>
+  </form>
+</main>
+
+<footer>
+  <p><a href="index.html">Accueil</a><a href="services.html">Services</a><a href="contact.html">Contact</a><a href="mentions-legales.html">Mentions légales</a></p>
+  <p style="margin-top:.75rem">© 2026 MethodAdmin</p>
+</footer>
+
+<script>
+const SUPABASE_URL = 'https://sahbhyccnkcqjzxkyzol.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGJoeWNjbmtjcWp6eGt5em9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDk2NTYsImV4cCI6MjA5MDE4NTY1Nn0.oFhul7RHQCCjqckmGK2jWPsLcFE9Ug9WGSqdoKVPXyo';
+let db = null;
+try { db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) { console.error(e); }
+
+// Radio cards
+document.querySelectorAll('.radio-card').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('checked'));
+    const input = card.querySelector('input');
+    input.checked = true;
+    card.classList.add('checked');
+    // Toggle liquidateur block
+    const showLiq = input.value === 'dissolution-liquidation' || input.value === 'dissolution';
+    document.getElementById('block-dissolution').classList.toggle('show', showLiq);
+  });
+});
+
+document.getElementById('cgu').addEventListener('change', (e) => {
+  document.getElementById('cgu-wrap').classList.toggle('checked', e.target.checked);
+});
+
+document.getElementById('siren').addEventListener('input', (e) => {
+  const d = e.target.value.replace(/\D/g, '').slice(0,9);
+  e.target.value = d.replace(/(\d{3})(?=\d)/g, '$1 ');
+});
+
+document.getElementById('form-fermeture').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const alertBox = document.getElementById('alert-error');
+  alertBox.classList.remove('show');
+
+  if (!db) { alertBox.textContent = 'Erreur technique. Veuillez rafraîchir la page.'; alertBox.classList.add('show'); return; }
+
+  const typeChecked = document.querySelector('input[name="type"]:checked');
+  if (!typeChecked) {
+    alertBox.textContent = 'Veuillez sélectionner le type de cessation.';
+    alertBox.classList.add('show');
+    window.scrollTo({top:0, behavior:'smooth'});
+    return;
+  }
+  if (!document.getElementById('cgu').checked) {
+    alertBox.textContent = 'Vous devez accepter les CGU pour continuer.';
+    alertBox.classList.add('show');
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = 'Envoi…';
+
+  const lines = [];
+  lines.push('Type de cessation : ' + typeChecked.value);
+  lines.push('SIREN : ' + document.getElementById('siren').value);
+  lines.push('Forme juridique : ' + document.getElementById('forme').value);
+  lines.push('Dénomination : ' + document.getElementById('denom').value);
+  const dateCess = document.getElementById('date-cessation').value;
+  if (dateCess) lines.push('Date de cessation : ' + dateCess);
+  const motif = document.getElementById('motif').value;
+  if (motif) lines.push('Motif : ' + motif);
+
+  if (typeChecked.value === 'dissolution-liquidation' || typeChecked.value === 'dissolution') {
+    const liqPre = document.getElementById('liq-prenom').value;
+    const liqNom = document.getElementById('liq-nom').value;
+    const liqAdr = document.getElementById('liq-adresse').value;
+    if (liqPre || liqNom) lines.push('Liquidateur : ' + liqPre + ' ' + liqNom);
+    if (liqAdr) lines.push('Conservation documents : ' + liqAdr);
+  }
+
+  const commentaire = document.getElementById('commentaire').value.trim();
+  if (commentaire) lines.push('Commentaire : ' + commentaire);
+
+  try {
+    const { data, error } = await db.rpc('soumettre_demande', {
+      p_prenom: document.getElementById('prenom').value.trim(),
+      p_nom: document.getElementById('nom').value.trim(),
+      p_email: document.getElementById('email').value.trim(),
+      p_telephone: document.getElementById('telephone').value.trim(),
+      p_service: 'fermeture',
+      p_description: lines.join('\n'),
+      p_urgence: 'normal'
+    });
+    if (error) throw error;
+    if (!data || data.success !== true) throw new Error((data && data.error) || 'Échec');
+
+    document.getElementById('ref-display').textContent = data.reference;
+    document.getElementById('form-fermeture').style.display = 'none';
+    document.querySelector('.page-head').style.display = 'none';
+    document.getElementById('success-screen').classList.add('show');
+    window.scrollTo({top:0, behavior:'smooth'});
+  } catch (err) {
+    console.error(err);
+    alertBox.textContent = 'Une erreur est survenue. Veuillez réessayer ou nous contacter directement.';
+    alertBox.classList.add('show');
+    btn.disabled = false; btn.textContent = 'Envoyer ma demande de fermeture ✉️';
+  }
+});
+</script>
+<script src="cookies-banner.js"></script>
+</body>
+</html>
