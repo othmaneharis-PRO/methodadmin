@@ -68,10 +68,10 @@ Ces variables sont **automatiquement remplacées** par Supabase au moment de l'e
 Pour que les liens fonctionnent correctement, vérifiez que vos URLs sont bien configurées dans Supabase :
 
 1. Allez dans **Authentication → URL Configuration**
-2. **Site URL** : `https://methodadmin.fr` (ou votre domaine de production)
+2. **Site URL** : `https://methodadmin.com` (ou votre domaine de production)
 3. **Redirect URLs** : ajoutez :
-   - `https://methodadmin.fr/espace-client.html`
-   - `https://methodadmin.fr/reset-password.html`
+   - `https://methodadmin.com/espace-client.html`
+   - `https://methodadmin.com/reset-password.html`
    - `http://localhost:3000/espace-client.html` (pour le développement)
    - `http://localhost:3000/reset-password.html`
 

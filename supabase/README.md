@@ -2,53 +2,102 @@
 
 Système complet d'emails transactionnels propulsé par **Resend** et **Supabase Edge Functions**.
 
+Domaine d'envoi : **`methodadmin.com`**
+
 ## 📋 Vue d'ensemble
 
 | Email | Déclencheur | Destinataire |
 |-------|-------------|--------------|
-| 🎉 **Bienvenue / Confirmation de compte** | Inscription via Supabase Auth | Nouveau client (géré par Supabase Auth — voir `/email-templates/`) |
-| 🔐 **Mot de passe oublié** | Demande de reset via Supabase Auth | Client (géré par Supabase Auth — voir `/email-templates/`) |
+| 🎉 **Bienvenue / Confirmation de compte** | Inscription via Supabase Auth | Nouveau client (template `/email-templates/confirm-signup.html`) |
+| 🔐 **Mot de passe oublié** | Demande de reset via Supabase Auth | Client (template `/email-templates/reset-password.html`) |
 | ✅ **Confirmation de demande reçue** | Nouvelle ligne dans `demandes` | Client |
 | 🔔 **Nouvelle demande reçue** | Nouvelle ligne dans `demandes` | Admin (`support@methodadmin.com`) |
 | 📊 **Mise à jour du statut** | UPDATE `demandes.statut` | Client |
 | 💬 **Nouveau message** | Nouvelle ligne dans `messages` | Client ou Admin (selon expéditeur) |
-| 📎 **Documents demandés** | Appel manuel `envoyer_demande_documents()` | Client |
+| 📎 **Documents demandés** | Appel manuel `SELECT envoyer_demande_documents(...)` | Client |
 
 ---
 
-## 🔑 Étape 1 — Obtenir une clé API Resend
+## 🔑 Étape 1 — Créer un compte Resend & obtenir la clé API
 
 1. Crée un compte gratuit sur **https://resend.com** (3 000 emails/mois gratuits)
-2. Dashboard → **API Keys** → **Create API Key**
-3. Copie la clé qui commence par `re_...`
-4. **Important** — Sans domaine vérifié, tu ne pourras envoyer qu'à l'adresse email du compte Resend (mode test). Pour envoyer à n'importe quel client, vérifie un domaine plus tard dans **Domains**.
+2. Dashboard → **API Keys** → **Create API Key** → "MethodAdmin production"
+3. Copie la clé qui commence par `re_...` — tu en auras besoin à l'étape 3
 
 ---
 
-## 📨 Étape 2 — Installer les 2 templates Supabase Auth
+## 🌐 Étape 2 — Vérifier ton domaine `methodadmin.com` dans Resend
 
-Templates de **confirmation de compte** et **mot de passe oublié** déjà créés dans `/app/email-templates/`.
+C'est **l'étape la plus importante**. Sans cette vérification, tu ne pourras pas envoyer depuis `noreply@methodadmin.com`.
 
-👉 Voir le fichier [`/app/email-templates/README.md`](../email-templates/README.md) pour l'installation pas-à-pas.
+### 2.1 — Ajouter le domaine dans Resend
+
+1. Dashboard Resend → **Domains** → **Add Domain**
+2. Saisis : `methodadmin.com`
+3. Choisis la région : **EU (Frankfurt)** (recommandé pour RGPD/clients français)
+4. Resend t'affiche **3 à 4 enregistrements DNS à ajouter** chez ton registrar (OVH, Gandi, Cloudflare, IONOS…)
+
+### 2.2 — Enregistrements DNS à ajouter
+
+Tu auras à ajouter ce type d'enregistrements (les valeurs exactes te sont données par Resend) :
+
+| Type | Nom (Host) | Valeur (à copier depuis Resend) |
+|------|------------|---------------------------------|
+| **TXT** (SPF) | `send.methodadmin.com` (ou `@`) | `v=spf1 include:amazonses.com ~all` |
+| **TXT** (DKIM) | `resend._domainkey.methodadmin.com` | Long string fournie par Resend (`p=MIGfMA0GC...`) |
+| **MX** (optionnel — pour bounce tracking) | `send.methodadmin.com` | `10 feedback-smtp.eu-west-1.amazonses.com` |
+| **TXT** (DMARC — recommandé) | `_dmarc.methodadmin.com` | `v=DMARC1; p=none; rua=mailto:dmarc@methodadmin.com` |
+
+### 2.3 — Où ajouter ces DNS ?
+
+Cela dépend de **où est géré ton domaine `methodadmin.com`** :
+
+- **OVH** : Espace client → Domaines → `methodadmin.com` → onglet **Zone DNS** → "Ajouter une entrée"
+- **Gandi** : Domaine → onglet **DNS Records** → "Add"
+- **Cloudflare** : Sélectionne le domaine → onglet **DNS** → "Add record"
+- **IONOS / 1&1** : Domaines → Gérer → DNS → Modifier
+- **Google Domains / Squarespace** : DNS → Custom records
+
+> 💡 Une fois les enregistrements ajoutés, retourne sur Resend et clique **"Verify"**. La propagation DNS peut prendre de 5 minutes à 24h (généralement < 1h).
+
+### 2.4 — Confirmation
+
+Quand le domaine est vérifié dans Resend (statut "Verified" en vert), tu pourras envoyer depuis **n'importe quelle adresse `@methodadmin.com`** (`noreply@`, `contact@`, `support@`, etc.).
 
 ---
 
-## ⚡ Étape 3 — Déployer l'Edge Function `send-email`
+## 📨 Étape 3 — Installer les 2 templates Supabase Auth
 
-### 3.1 — Installer la CLI Supabase (une seule fois)
+Templates **confirmation de compte** et **mot de passe oublié** déjà créés dans `/app/email-templates/`.
+
+👉 Voir [`/app/email-templates/README.md`](../email-templates/README.md) pour les détails.
+
+Dans **Supabase Dashboard → Authentication → Email Templates** :
+- **Confirm signup** : colle `confirm-signup.html`
+- **Reset Password** : colle `reset-password.html`
+
+Puis dans **Authentication → URL Configuration**, ajoute aux **Redirect URLs** :
+- `https://methodadmin.com/espace-client.html`
+- `https://methodadmin.com/reset-password.html`
+
+---
+
+## ⚡ Étape 4 — Déployer l'Edge Function `send-email`
+
+### 4.1 — Installer la CLI Supabase (une fois)
 
 ```bash
 # macOS / Linux
 brew install supabase/tap/supabase
 
-# Windows (via scoop)
+# Windows (scoop)
 scoop install supabase
 
-# Ou via npm
+# ou via npm
 npm install -g supabase
 ```
 
-### 3.2 — Se connecter et lier le projet
+### 4.2 — Se connecter et lier le projet
 
 ```bash
 cd /app
@@ -56,26 +105,22 @@ supabase login
 supabase link --project-ref sahbhyccnkcqjzxkyzol
 ```
 
-### 3.3 — Configurer les secrets de la fonction
+### 4.3 — Configurer les secrets
 
 ```bash
 supabase secrets set RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxx
-supabase secrets set SENDER_EMAIL=onboarding@resend.dev
+supabase secrets set SENDER_EMAIL=noreply@methodadmin.com
 supabase secrets set ADMIN_EMAIL=support@methodadmin.com
-supabase secrets set APP_URL=https://methodadmin.fr
+supabase secrets set APP_URL=https://methodadmin.com
 ```
 
-> 💡 **Plus tard**, quand tu auras vérifié ton domaine dans Resend, remplace `SENDER_EMAIL` par `noreply@methodadmin.fr` (ou similaire).
-
-### 3.4 — Déployer la fonction
+### 4.4 — Déployer
 
 ```bash
 supabase functions deploy send-email --no-verify-jwt
 ```
 
-Le flag `--no-verify-jwt` permet aux triggers Postgres de l'appeler avec la clé `service_role` directement (sans token utilisateur).
-
-### 3.5 — Tester manuellement
+### 4.5 — Test manuel
 
 ```bash
 curl -X POST \
@@ -89,53 +134,39 @@ curl -X POST \
   https://sahbhyccnkcqjzxkyzol.supabase.co/functions/v1/send-email
 ```
 
-Réponse attendue :
-```json
-{ "ok": true, "id": "xxxxxxxx-xxxx-..." }
-```
+Réponse attendue : `{"ok":true,"id":"..."}`. Vérifie ta boîte mail.
 
 ---
 
-## 🗄️ Étape 4 — Installer les triggers SQL
+## 🗄️ Étape 5 — Installer les triggers SQL
 
-1. Ouvre **Supabase Dashboard → Database → SQL Editor**
-2. Crée une nouvelle requête
-3. Ouvre le fichier [`/app/supabase/migrations/email_triggers.sql`](./migrations/email_triggers.sql)
-4. **Avant d'exécuter**, remplace dans le `INSERT INTO internal_config` :
-   - `service_role_key` par ta vraie **service_role key** (Settings → API → `service_role` secret)
-5. Exécute le script complet
-6. Vérifie qu'aucune erreur n'apparaît dans la console SQL
+1. **Supabase Dashboard → Database → SQL Editor → New query**
+2. Ouvre [`/app/supabase/migrations/email_triggers.sql`](./migrations/email_triggers.sql)
+3. **Avant d'exécuter**, remplace dans le `INSERT INTO internal_config` :
+   - La valeur `REMPLACE_PAR_TA_SERVICE_ROLE_KEY` par ta vraie **service_role key** (Settings → API)
+4. Exécute le script complet
+5. Vérifie qu'aucune erreur n'apparaît
 
-> 🔒 La clé `service_role` est stockée dans une table interne avec **RLS activée et aucune policy** → personne ne peut la lire depuis le client (seuls les triggers en `SECURITY DEFINER` y accèdent).
+> 🔒 La clé `service_role` est stockée dans une table avec **RLS activée et zéro policy** → personne ne peut la lire depuis le client.
 
 ---
 
-## 🧪 Étape 5 — Tester de bout en bout
+## 🧪 Étape 6 — Tests de bout en bout
 
-### Test 1 : confirmation de demande
-1. Va sur `index.html` ou une page formulaire
-2. Soumets une demande avec **ton email vérifié dans Resend**
-3. Tu dois recevoir :
-   - ✅ L'email de confirmation
-   - 🔔 (Si tu utilises aussi ton email comme `ADMIN_EMAIL`) le mail admin
+| Test | Comment faire | Email attendu |
+|------|---------------|---------------|
+| **Confirmation demande** | Soumets le formulaire `index.html` ou `/modification.html` | Email "Demande reçue" au client + "Nouvelle demande" à l'admin |
+| **Statut** | Dans `espace-admin.html`, change le statut d'une demande | Email "Mise à jour" au client |
+| **Message** | Envoie un message depuis `espace-admin.html` | Email "Nouveau message" au client |
+| **Documents** | SQL Editor : `SELECT envoyer_demande_documents(...)` (voir ci-dessous) | Email "Documents demandés" au client |
 
-### Test 2 : changement de statut
-1. Connecte-toi à `espace-admin.html`
-2. Change le statut d'une demande
-3. Le client doit recevoir le mail "Mise à jour de votre demande"
-
-### Test 3 : message
-1. Depuis `espace-admin.html`, envoie un message à un dossier
-2. Le client doit recevoir l'email "Nouveau message"
-
-### Test 4 : documents demandés (appel manuel)
-Dans le SQL Editor :
 ```sql
+-- Test de demande de documents :
 SELECT envoyer_demande_documents(
-  p_demande_id := '<UUID-de-la-demande>',
+  p_demande_id := '<UUID_de_la_demande>',
   p_documents  := ARRAY[
     'Carte d''identité du gérant',
-    'Justificatif de domicile',
+    'Justificatif de domicile (- 3 mois)',
     'Statuts signés'
   ],
   p_note := 'Merci de nous transmettre ces pièces sous 48h.'
@@ -146,31 +177,25 @@ SELECT envoyer_demande_documents(
 
 ## 📊 Suivi & debug
 
-### Voir les emails envoyés
-- **Resend Dashboard → Logs** : tous les emails envoyés, leurs statuts (delivered, bounced, opened, etc.)
-
-### Voir les appels HTTP des triggers
-Dans le SQL Editor :
-```sql
-SELECT id, status_code, content, created
-FROM net._http_response
-ORDER BY created DESC
-LIMIT 20;
-```
-
-### Voir les logs de l'Edge Function
-- **Supabase Dashboard → Edge Functions → send-email → Logs**
+| Quoi observer | Où |
+|---------------|----|
+| Liste de tous les emails envoyés (delivered, bounced, opened…) | **Resend Dashboard → Logs** |
+| Appels HTTP des triggers Postgres | SQL : `SELECT * FROM net._http_response ORDER BY created DESC LIMIT 20;` |
+| Logs / erreurs de l'Edge Function | **Supabase Dashboard → Edge Functions → send-email → Logs** |
+| Statut de vérification du domaine | **Resend → Domains → methodadmin.com** |
 
 ---
 
-## 🔧 Personnalisation rapide
+## 🔧 Personnalisations utiles
 
-### Changer l'email admin
-- Soit : modifier la constante `v_admin_email` dans les 2 triggers SQL
-- Soit : modifier le secret `ADMIN_EMAIL` côté Edge Function (mais les triggers passent l'email en dur dans le payload — voir SQL)
+### Changer l'adresse expéditrice
+Une fois ton domaine vérifié, tu peux utiliser n'importe quelle adresse :
+```bash
+supabase secrets set SENDER_EMAIL=contact@methodadmin.com
+```
 
 ### Modifier le design d'un template
-Édite `/app/supabase/functions/send-email/index.ts` → fonctions `tpl*` puis redéploie :
+Édite `/app/supabase/functions/send-email/index.ts` (fonctions `tpl*`) puis redéploie :
 ```bash
 supabase functions deploy send-email --no-verify-jwt
 ```
@@ -178,19 +203,9 @@ supabase functions deploy send-email --no-verify-jwt
 ### Désactiver temporairement un trigger
 ```sql
 ALTER TABLE demandes DISABLE TRIGGER demande_created_email;
--- (et inversement avec ENABLE TRIGGER pour réactiver)
+-- réactiver :
+ALTER TABLE demandes ENABLE TRIGGER demande_created_email;
 ```
-
----
-
-## ⚠️ Limites du mode test Resend (sans domaine vérifié)
-
-Tant que tu utilises `onboarding@resend.dev` :
-- Tu ne peux envoyer **qu'à l'adresse email du compte Resend** (le tien)
-- Les emails contiennent une mention "via resend.dev"
-- Le score de délivrabilité est plus faible
-
-**Solution** : dès que possible, vérifie un domaine dans **Resend → Domains** (5 minutes, juste 3 enregistrements DNS à ajouter). Tu pourras alors envoyer à n'importe quelle adresse depuis `noreply@tondomaine.fr`.
 
 ---
 
@@ -199,24 +214,29 @@ Tant que tu utilises `onboarding@resend.dev` :
 ```
 /app/
 ├── email-templates/
-│   ├── confirm-signup.html       ← Confirmation compte (à coller dans Supabase Auth)
-│   ├── reset-password.html       ← Mot de passe oublié (idem)
+│   ├── confirm-signup.html       ← Template "Confirm signup" (Supabase Auth)
+│   ├── reset-password.html       ← Template "Reset Password" (Supabase Auth)
 │   └── README.md
 └── supabase/
     ├── functions/send-email/
     │   └── index.ts              ← Edge Function (Deno/TS) — Resend API
     ├── migrations/
-    │   └── email_triggers.sql    ← Triggers Postgres
+    │   └── email_triggers.sql    ← Triggers Postgres automatiques
     └── README.md                 ← Ce fichier
 ```
 
 ---
 
-## ❓ Ce qu'il faut me fournir pour finaliser
+## ✅ Checklist finale
 
-Pour que je puisse t'aider à terminer le setup :
-1. **Clé API Resend** (`re_...`) — uniquement si tu veux que je l'intègre côté code (sinon, configure-la toi-même via `supabase secrets set`)
-2. **Service Role Key Supabase** — uniquement pour le `INSERT INTO internal_config` du SQL (ou tu le fais toi-même)
-3. **Confirmation que tu as bien un compte Resend** créé
-
-Tu peux faire le déploiement toi-même en suivant les étapes 3 et 4 ci-dessus — c'est ~10 minutes au total.
+- [ ] Compte Resend créé + clé API copiée
+- [ ] Domaine `methodadmin.com` ajouté dans Resend
+- [ ] Enregistrements DNS ajoutés chez le registrar
+- [ ] Domaine vérifié (badge "Verified" vert dans Resend)
+- [ ] Templates Auth installés dans Supabase
+- [ ] Redirect URLs configurées (`https://methodadmin.com/...`)
+- [ ] CLI Supabase installée + projet lié
+- [ ] Secrets de la fonction Edge configurés
+- [ ] Fonction Edge déployée
+- [ ] Triggers SQL installés (avec la vraie service_role key)
+- [ ] Test de chaque type d'email réussi 🎉

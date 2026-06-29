@@ -7,18 +7,18 @@
 // 
 // Secrets à configurer (Supabase Dashboard > Edge Functions > send-email > Secrets) :
 //   RESEND_API_KEY  = re_xxxxxxxxxxxxxxxxx
-//   SENDER_EMAIL    = onboarding@resend.dev  (ou ton domaine vérifié)
+//   SENDER_EMAIL    = noreply@methodadmin.com  (domaine vérifié dans Resend)
 //   ADMIN_EMAIL     = support@methodadmin.com
-//   APP_URL         = https://methodadmin.fr (ou ton URL Vercel)
+//   APP_URL         = https://methodadmin.com
 // ============================================================
 
 // @ts-ignore — Deno runtime
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
-const SENDER_EMAIL   = Deno.env.get("SENDER_EMAIL")   ?? "onboarding@resend.dev";
+const SENDER_EMAIL   = Deno.env.get("SENDER_EMAIL")   ?? "noreply@methodadmin.com";
 const ADMIN_EMAIL    = Deno.env.get("ADMIN_EMAIL")    ?? "support@methodadmin.com";
-const APP_URL        = Deno.env.get("APP_URL")        ?? "https://methodadmin.fr";
+const APP_URL        = Deno.env.get("APP_URL")        ?? "https://methodadmin.com";
 const FROM_NAME      = "MethodAdmin";
 
 // ---------- Charte graphique commune ----------
