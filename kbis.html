@@ -366,7 +366,7 @@ document.getElementById('form-kbis').addEventListener('submit', async (e) => {
       p_email: document.getElementById('email').value.trim(),
       p_telephone: document.getElementById('telephone').value.trim(),
       p_service: 'kbis',
-      p_description: lines.join('\n'),
+      p_description: (window.enrichirDescriptionAvecPack || (s=>s))(lines.join('\n')),
       p_urgence: urgenceSel === 'express' ? 'urgent' : (urgenceSel === 'urgent' ? 'urgent' : 'normal')
     });
     if (error) throw error;
@@ -386,5 +386,6 @@ document.getElementById('form-kbis').addEventListener('submit', async (e) => {
 });
 </script>
 <script src="cookies-banner.js"></script>
+<script src="pack-selector.js"></script>
 </body>
 </html>

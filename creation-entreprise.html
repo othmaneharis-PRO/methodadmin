@@ -1546,7 +1546,7 @@
         p_email: document.getElementById('email').value.trim(),
         p_telephone: document.getElementById('telephone').value.trim(),
         p_service: 'creation',
-        p_description: descriptionComplete,
+        p_description: (window.enrichirDescriptionAvecPack || (s=>s))(descriptionComplete),
         p_urgence: urgenceDb
       });
 
@@ -1604,5 +1604,6 @@
   });
 </script>
 <script src="cookies-banner.js"></script>
+<script src="pack-selector.js"></script>
 </body>
 </html>

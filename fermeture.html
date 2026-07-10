@@ -332,7 +332,7 @@ document.getElementById('form-fermeture').addEventListener('submit', async (e) =
       p_email: document.getElementById('email').value.trim(),
       p_telephone: document.getElementById('telephone').value.trim(),
       p_service: 'fermeture',
-      p_description: lines.join('\n'),
+      p_description: (window.enrichirDescriptionAvecPack || (s=>s))(lines.join('\n')),
       p_urgence: 'normal'
     });
     if (error) throw error;
@@ -352,5 +352,6 @@ document.getElementById('form-fermeture').addEventListener('submit', async (e) =
 });
 </script>
 <script src="cookies-banner.js"></script>
+<script src="pack-selector.js"></script>
 </body>
 </html>
