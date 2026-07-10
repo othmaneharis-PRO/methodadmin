@@ -15,26 +15,42 @@
     nav a { font-size:.88rem; color:var(--gray); text-decoration:none; transition:.15s; }
     nav a:hover { color:var(--blue); }
     .btn-nav { background:var(--blue); color:white !important; padding:.5rem 1.1rem; border-radius:var(--radius); font-weight:600; }
-    main { max-width:1000px; margin:3rem auto; padding:0 1.5rem 4rem; }
+    main { max-width:1180px; margin:3rem auto; padding:0 1.5rem 4rem; }
     .hero-txt { text-align:center; margin-bottom:3rem; }
     .hero-txt h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:2.2rem; font-weight:800; color:var(--dark); }
     .hero-txt p { color:var(--gray); margin-top:.75rem; font-size:1rem; }
-    .service-block { background:white; border:1px solid var(--border); border-radius:var(--radius-lg); padding:2rem; margin-bottom:1.5rem; display:grid; grid-template-columns:auto 1fr auto; gap:1.5rem; align-items:start; box-shadow:var(--shadow); }
-    .svc-icon { font-size:2.5rem; }
-    .svc-title { font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:1.15rem; color:var(--dark); margin-bottom:.4rem; }
-    .svc-desc { font-size:.88rem; color:var(--gray); line-height:1.6; }
-    .svc-includes { margin-top:.75rem; }
-    .svc-includes li { font-size:.83rem; color:var(--gray); margin-bottom:.2rem; list-style:none; padding-left:1.1rem; position:relative; }
-    .svc-includes li::before { content:'✓'; position:absolute; left:0; color:var(--blue); font-weight:700; }
-    .svc-price-box { text-align:center; background:var(--blue-light); border-radius:var(--radius-lg); padding:1rem 1.25rem; min-width:130px; }
-    .svc-from { font-size:.73rem; color:var(--gray); }
-    .svc-amount { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.5rem; color:var(--blue); }
-    .svc-ttc { font-size:.72rem; color:var(--gray); }
-    .svc-cta { display:block; margin-top:.75rem; background:var(--blue); color:white; border-radius:var(--radius); padding:.5rem .9rem; font-size:.8rem; font-weight:700; text-decoration:none; text-align:center; transition:.15s; }
-    .svc-cta:hover { background:var(--blue-hover); }
+
+    .cat-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.4rem; font-weight:800; color:var(--dark); margin:2.5rem 0 1.25rem; display:flex; align-items:center; gap:.6rem; }
+    .cat-title .cat-icon { font-size:1.6rem; }
+
+    .pack-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:1.25rem; }
+
+    .pack-card { background:white; border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.75rem 1.75rem 1.5rem; display:flex; flex-direction:column; box-shadow:var(--shadow); transition:.2s; position:relative; }
+    .pack-card:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(26,86,219,.15); }
+    .pack-card.pack-express { border:1.5px solid var(--blue); }
+
+    .pack-badge { display:inline-block; font-size:.68rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; padding:.22rem .6rem; border-radius:999px; background:#dcfce7; color:#166534; margin-bottom:.9rem; align-self:flex-start; }
+    .pack-express .pack-badge { background:var(--blue); color:white; }
+
+    .pack-title { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.05rem; color:var(--dark); line-height:1.25; margin-bottom:.35rem; }
+    .pack-subtitle { font-size:.82rem; color:var(--gray); margin-bottom:1rem; }
+
+    .pack-list { list-style:none; margin-bottom:1.25rem; }
+    .pack-list li { font-size:.86rem; color:var(--dark); padding:.4rem 0 .4rem 1.75rem; position:relative; line-height:1.4; }
+    .pack-list li::before { content:'✓'; position:absolute; left:0; top:50%; transform:translateY(-50%); width:22px; height:22px; background:var(--blue-light); color:var(--blue); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:800; }
+
+    .pack-footer { margin-top:auto; padding-top:1rem; border-top:1px solid var(--border); display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; }
+    .pack-price-block { display:flex; align-items:baseline; gap:.15rem; }
+    .pack-price { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:2.1rem; color:var(--dark); line-height:1; }
+    .pack-currency { font-size:1rem; color:var(--dark); font-weight:700; }
+    .pack-category-lbl { display:block; font-size:.68rem; color:var(--gray); text-transform:uppercase; letter-spacing:.08em; margin-top:.25rem; font-weight:700; }
+
+    .pack-cta { background:var(--blue); color:white; text-decoration:none; border-radius:var(--radius); padding:.55rem 1.1rem; font-size:.82rem; font-weight:700; transition:.15s; white-space:nowrap; }
+    .pack-cta:hover { background:var(--blue-hover); }
+
     footer { background:var(--dark); color:#94a3b8; padding:3rem 1.5rem; text-align:center; font-size:.83rem; }
     footer a { color:#94a3b8; text-decoration:none; margin:0 .75rem; }
-    @media(max-width:600px) { .service-block { grid-template-columns:1fr; } }
+    @media(max-width:768px) { .pack-grid { grid-template-columns:1fr; } .pack-card { padding:1.5rem 1.4rem 1.25rem; } .pack-price { font-size:1.85rem; } }
   </style>
   <link rel="stylesheet" href="mobile.css">
 </head>
@@ -50,90 +66,219 @@
 </header>
 <main>
   <div class="hero-txt">
-    <h1>Nos services</h1>
-    <p>Des formalités simplifiées, un accompagnement humain, des tarifs transparents.</p>
+    <h1>Nos packs de services</h1>
+    <p>Des formalités simplifiées, un accompagnement humain, des tarifs transparents et sans surprise.</p>
   </div>
 
-  <div class="service-block" id="creation">
-    <div class="svc-icon">🚀</div>
-    <div>
-      <div class="svc-title">Création d'entreprise</div>
-      <div class="svc-desc">Nous gérons l'intégralité de votre immatriculation au Registre du Commerce et des Sociétés (RCS) ou au Registre National des Entreprises (RNE).</div>
-      <ul class="svc-includes">
-        <li>Rédaction des statuts (EURL/SASU)</li>
-        <li>Publication de l'annonce légale</li>
-        <li>Dépôt du dossier au greffe</li>
-        <li>Obtention de l'extrait Kbis</li>
-        <li>Suivi en temps réel dans votre espace</li>
+  <!-- ==================== CRÉATION ==================== -->
+  <div class="cat-title"><span class="cat-icon">🚀</span> Création d'entreprise</div>
+  <div class="pack-grid">
+
+    <div class="pack-card">
+      <span class="pack-badge">Actif</span>
+      <div class="pack-title">Pack Standard Création Micro-Entreprise</div>
+      <div class="pack-subtitle">Pack Standard Création Micro-Entreprise</div>
+      <ul class="pack-list">
+        <li>Déclaration complète</li>
+        <li>Création d'un compte Inpi</li>
+        <li>Obtention d'un SIREN</li>
+        <li>Synthèse définitive à valider</li>
       </ul>
+      <div class="pack-footer">
+        <div class="pack-price-block-wrap">
+          <div class="pack-price-block"><span class="pack-price">49</span><span class="pack-currency">€</span></div>
+          <span class="pack-category-lbl">Création</span>
+        </div>
+        <a href="creation-entreprise.html" class="pack-cta">Choisir →</a>
+      </div>
     </div>
-    <div class="svc-price-box">
-      <div class="svc-from">À partir de</div>
-      <div class="svc-amount">149 €</div>
-      <div class="svc-ttc">HT</div>
-      <a href="creation-entreprise.html" class="svc-cta">Commencer →</a>
-    </div>
-  </div>
 
-  <div class="service-block" id="modification">
-    <div class="svc-icon">✏️</div>
-    <div>
-      <div class="svc-title">Modification</div>
-      <div class="svc-desc">Changement de siège social, de gérant, d'objet social, de dénomination ou d'autres mentions — nous déposons le dossier modificatif au greffe.</div>
-      <ul class="svc-includes">
-        <li>Changement de siège social</li>
-        <li>Changement de gérant / dirigeant</li>
-        <li>Modification de l'objet social</li>
-        <li>Changement de dénomination</li>
-        <li>Augmentation / réduction de capital</li>
+    <div class="pack-card">
+      <span class="pack-badge">Actif</span>
+      <div class="pack-title">Pack Standard Création Entreprise Individuelle</div>
+      <div class="pack-subtitle">Pack Standard Création Entreprise Individuelle</div>
+      <ul class="pack-list">
+        <li>Déclaration complète</li>
+        <li>Création d'un compte Inpi</li>
+        <li>Obtention d'un SIREN</li>
+        <li>Synthèse définitive à valider</li>
       </ul>
+      <div class="pack-footer">
+        <div class="pack-price-block-wrap">
+          <div class="pack-price-block"><span class="pack-price">59</span><span class="pack-currency">€</span></div>
+          <span class="pack-category-lbl">Création</span>
+        </div>
+        <a href="creation-entreprise.html" class="pack-cta">Choisir →</a>
+      </div>
     </div>
-    <div class="svc-price-box">
-      <div class="svc-from">À partir de</div>
-      <div class="svc-amount">99 €</div>
-      <div class="svc-ttc">HT</div>
-      <a href="modification.html" class="svc-cta">Demander →</a>
-    </div>
-  </div>
 
-  <div class="service-block" id="fermeture">
-    <div class="svc-icon">🔒</div>
-    <div>
-      <div class="svc-title">Fermeture / Radiation</div>
-      <div class="svc-desc">Dissolution, liquidation amiable et radiation de votre société ou entreprise individuelle auprès du greffe compétent.</div>
-      <ul class="svc-includes">
-        <li>Décision de dissolution</li>
-        <li>Publication de l'annonce légale</li>
-        <li>Dépôt de la liquidation</li>
-        <li>Radiation définitive</li>
+    <div class="pack-card pack-express">
+      <span class="pack-badge">Express</span>
+      <div class="pack-title">Pack Création Micro-Entreprise Express</div>
+      <div class="pack-subtitle">Traitement prioritaire</div>
+      <ul class="pack-list">
+        <li>Prise en charge en 24h du dossier</li>
+        <li>Déclaration complète</li>
+        <li>Création d'un compte Inpi</li>
+        <li>Obtention d'un SIREN</li>
       </ul>
+      <div class="pack-footer">
+        <div class="pack-price-block-wrap">
+          <div class="pack-price-block"><span class="pack-price">59</span><span class="pack-currency">€</span></div>
+          <span class="pack-category-lbl">Création</span>
+        </div>
+        <a href="creation-entreprise.html" class="pack-cta">Choisir →</a>
+      </div>
     </div>
-    <div class="svc-price-box">
-      <div class="svc-from">À partir de</div>
-      <div class="svc-amount">199 €</div>
-      <div class="svc-ttc">HT</div>
-      <a href="fermeture.html" class="svc-cta">Demander →</a>
+
+    <div class="pack-card pack-express">
+      <span class="pack-badge">Express</span>
+      <div class="pack-title">Pack Création Entreprise Individuelle Express</div>
+      <div class="pack-subtitle">Création express</div>
+      <ul class="pack-list">
+        <li>Prise en charge en 24h du dossier</li>
+        <li>Déclaration complète</li>
+        <li>Création d'un compte Inpi</li>
+        <li>Obtention d'un SIREN</li>
+        <li>Synthèse définitive à valider</li>
+      </ul>
+      <div class="pack-footer">
+        <div class="pack-price-block-wrap">
+          <div class="pack-price-block"><span class="pack-price">69</span><span class="pack-currency">€</span></div>
+          <span class="pack-category-lbl">Création</span>
+        </div>
+        <a href="creation-entreprise.html" class="pack-cta">Choisir →</a>
+      </div>
     </div>
   </div>
 
-  <div class="service-block" id="kbis">
-    <div class="svc-icon">📄</div>
-    <div>
-      <div class="svc-title">Extrait Kbis</div>
-      <div class="svc-desc">Obtention rapide de votre extrait Kbis officiel auprès du greffe du tribunal de commerce, avec ou sans apostille.</div>
-      <ul class="svc-includes">
+  <!-- ==================== CESSATION ==================== -->
+  <div class="cat-title"><span class="cat-icon">🔒</span> Cessation / Radiation</div>
+  <div class="pack-grid">
+
+    <div class="pack-card">
+      <span class="pack-badge">Actif</span>
+      <div class="pack-title">Pack Standard Cessation Micro-Entreprise</div>
+      <div class="pack-subtitle">Pack Standard Cessation Micro-Entreprise</div>
+      <ul class="pack-list">
+        <li>Suivi complet jusqu'à radiation</li>
+        <li>Attestation de radiation du RNE</li>
+        <li>Synthèse définitive à valider</li>
+      </ul>
+      <div class="pack-footer">
+        <div class="pack-price-block-wrap">
+          <div class="pack-price-block"><span class="pack-price">59</span><span class="pack-currency">€</span></div>
+          <span class="pack-category-lbl">Cessation</span>
+        </div>
+        <a href="fermeture.html" class="pack-cta">Choisir →</a>
+      </div>
+    </div>
+
+    <div class="pack-card">
+      <span class="pack-badge">Actif</span>
+      <div class="pack-title">Pack Standard Cessation d'Entreprise Individuelle</div>
+      <div class="pack-subtitle">Pack Standard Cessation d'Entreprise Individuelle</div>
+      <ul class="pack-list">
+        <li>Suivi complet jusqu'à radiation</li>
+        <li>Attestation de radiation du RNE</li>
+        <li>Synthèse définitive à valider</li>
+      </ul>
+      <div class="pack-footer">
+        <div class="pack-price-block-wrap">
+          <div class="pack-price-block"><span class="pack-price">69</span><span class="pack-currency">€</span></div>
+          <span class="pack-category-lbl">Cessation</span>
+        </div>
+        <a href="fermeture.html" class="pack-cta">Choisir →</a>
+      </div>
+    </div>
+
+    <div class="pack-card pack-express">
+      <span class="pack-badge">Express</span>
+      <div class="pack-title">Pack Cessation Micro-Entreprise Express</div>
+      <div class="pack-subtitle">Traitement prioritaire</div>
+      <ul class="pack-list">
+        <li>Dossier prioritaire</li>
+        <li>Attestation de radiation du RNE</li>
+        <li>Synthèse définitive à valider</li>
+        <li>Avis de situation à jour</li>
+      </ul>
+      <div class="pack-footer">
+        <div class="pack-price-block-wrap">
+          <div class="pack-price-block"><span class="pack-price">59</span><span class="pack-currency">€</span></div>
+          <span class="pack-category-lbl">Cessation</span>
+        </div>
+        <a href="fermeture.html" class="pack-cta">Choisir →</a>
+      </div>
+    </div>
+
+    <div class="pack-card pack-express">
+      <span class="pack-badge">Express</span>
+      <div class="pack-title">Pack Cessation Entreprise Individuelle Express</div>
+      <div class="pack-subtitle">Procédure complète de cessation d'une Entreprise Individuelle</div>
+      <ul class="pack-list">
+        <li>Dossier prioritaire 24h</li>
+        <li>Suivi complet jusqu'à radiation</li>
+        <li>Attestation de radiation du RNE</li>
+        <li>Synthèse définitive à valider</li>
+        <li>Avis de situation à jour</li>
+      </ul>
+      <div class="pack-footer">
+        <div class="pack-price-block-wrap">
+          <div class="pack-price-block"><span class="pack-price">69</span><span class="pack-currency">€</span></div>
+          <span class="pack-category-lbl">Cessation</span>
+        </div>
+        <a href="fermeture.html" class="pack-cta">Choisir →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODIFICATION ==================== -->
+  <div class="cat-title"><span class="cat-icon">✏️</span> Modification</div>
+  <div class="pack-grid">
+
+    <div class="pack-card pack-express">
+      <span class="pack-badge">Express</span>
+      <div class="pack-title">Pack Modification Express</div>
+      <div class="pack-subtitle">PME</div>
+      <ul class="pack-list">
+        <li>Prise en charge en 24h</li>
+        <li>Toutes modifications de votre établissement</li>
+        <li>Attestation du Registre National des Entreprises à jour</li>
+        <li>Synthèse définitive à valider</li>
+        <li>Avis de situation INSEE à jour</li>
+      </ul>
+      <div class="pack-footer">
+        <div class="pack-price-block-wrap">
+          <div class="pack-price-block"><span class="pack-price">100</span><span class="pack-currency">€</span></div>
+          <span class="pack-category-lbl">Modification</span>
+        </div>
+        <a href="modification.html" class="pack-cta">Choisir →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== KBIS ==================== -->
+  <div class="cat-title" id="kbis"><span class="cat-icon">📄</span> Extrait Kbis</div>
+  <div class="pack-grid">
+    <div class="pack-card">
+      <span class="pack-badge">Actif</span>
+      <div class="pack-title">Extrait Kbis / Extrait K</div>
+      <div class="pack-subtitle">Document officiel daté de moins de 3 mois</div>
+      <ul class="pack-list">
         <li>Kbis de moins de 3 mois</li>
         <li>Livraison par email en PDF</li>
-        <li>Délai : 24–48h ouvrées</li>
+        <li>Délai : 24 à 48h ouvrées</li>
       </ul>
-    </div>
-    <div class="svc-price-box">
-      <div class="svc-from">À partir de</div>
-      <div class="svc-amount">9 €</div>
-      <div class="svc-ttc">TTC</div>
-      <a href="kbis.html" class="svc-cta">Commander →</a>
+      <div class="pack-footer">
+        <div class="pack-price-block-wrap">
+          <div class="pack-price-block"><span class="pack-price">9</span><span class="pack-currency">€</span></div>
+          <span class="pack-category-lbl">Kbis</span>
+        </div>
+        <a href="kbis.html" class="pack-cta">Commander →</a>
+      </div>
     </div>
   </div>
+
 </main>
 <footer>
   <p><a href="index.html">Accueil</a><a href="faq.html">FAQ</a><a href="contact.html">Contact</a><a href="mentions-legales.html">Mentions légales</a></p>
